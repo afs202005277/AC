@@ -63,9 +63,22 @@ def main():
     players['birthDate'] = pd.to_datetime(players['birthDate'])
     players['birthYear'] = players['birthDate'].dt.year
     players = players.drop('birthDate', axis='columns')
-
-    print(players.describe())
     print(players.loc[:, players.columns != 'bioID'].corr())
+
+    print("\n\n\n")
+    print(len(teams.columns))
+    
+    #remove divID that is NaN in all objects
+    print(teams['divID'].isna().sum())
+    teams.drop('divID', inplace = True, axis = 'columns')
+
+    #merge players and awards_players by bioID and playerID
+    players = pd.merge(players,awards_players, left_on='bioID', right_on='playerID', how ='inner')
+    print(players.head())
+    del awards_players
+    print(players.head())
+    
+
 
 
 
