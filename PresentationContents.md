@@ -19,6 +19,8 @@ In every Machine Learning project, the dataset preparation is a crucial step in 
   - Conversion of college's names and the positions of the players into numerical indexes, allowing the calculation of the correlation matrix in order to find out the existence of redundant attributes
   - Removal of the "firstseason" and "lastseason" columns, since all the instances have '0' in both the columns therefore these attributes do not add additional information to the players
   - Replacement of the birth date with the birth year of the player to make the comparisons easier without losing relevant information.
+  - Creation of a new column 'EFF' that is a measure of a player performace which is very useful for our final goal.
+  - Merge dataframe players with players_teams (where playerID = bioID) 
 
 - Teams:
   - Removal of the divID attribute that is NAN in all rows of the table, therefore useless

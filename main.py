@@ -1,6 +1,7 @@
 import pandas as pd
+import numpy as np
 
-
+    
 def main():
     awards_players = pd.read_csv('./basketballPlayoffs/awards_players.csv')
     coaches = pd.read_csv('./basketballPlayoffs/coaches.csv')
@@ -74,9 +75,15 @@ def main():
 
     #merge players and awards_players by bioID and playerID
     players = pd.merge(players,awards_players, left_on='bioID', right_on='playerID', how ='inner')
-    print(players.head())
     del awards_players
-    print(players.head())
+    print(players.info())
+    
+    players_teams['EFF'] = (players_teams['points'] + players_teams['rebounds'] + players_teams['assists']+ players_teams['steals']+ players_teams['blocks']- (players_teams['fgAttempted'] - players_teams['fgMade'])- (players_teams['ftAttempted'] - players_teams['ftMade'])- np.where(players_teams['GP'] == 0, 0, players_teams['turnovers'])) / players_teams['GP']
+    
+    players_teams = pd.merge(players_teams,players, left_on='playerID', right_on='bioID', how = 'inner')
+    
+    print(players_teams['EFF'].head())
+    
     
 
 
