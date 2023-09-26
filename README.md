@@ -1,7 +1,7 @@
 ## Algoritmo em Players
 
-- Calcular scores por ano dos jogadores
-- Concat player_teams com player onde bioId = playerId
+- Calcular scores por ano dos jogadores (done)
+- Concat player_teams com player onde bioId = playerId (done)
 - Treinar ML em players_teams com o objetivo de prever of scores previamente acrescentados (passo 1)
 - Calcular para o 10o ano os scores
 
