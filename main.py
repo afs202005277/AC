@@ -2,7 +2,18 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
 
-    
+def progress(row):
+    if pd.isnull(row['firstRound']):
+        return 0
+    elif row['firstRound']=='L':
+        return 0.5
+    elif row['semis']=='L':
+        return 1.5
+    elif row['finals']=='L':
+        return 2.5
+    else:
+        return 3
+        
 def main():
     awards_players = pd.read_csv('./basketballPlayoffs/awards_players.csv')
     coaches = pd.read_csv('./basketballPlayoffs/coaches.csv')
