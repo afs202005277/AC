@@ -80,8 +80,8 @@ def main():
     teams.drop('divID', inplace = True, axis = 'columns')
 
     #merge players and awards_players by bioID and playerID
-    players = pd.merge(players,awards_players, left_on='bioID', right_on='playerID', how ='inner')
-    del awards_players
+    #players = pd.merge(players,awards_players, left_on='bioID', right_on='playerID', how ='inner')
+    #del awards_players
     players_teams['EFF'] = (players_teams['points'] + players_teams['rebounds'] + players_teams['assists']+ players_teams['steals']+ players_teams['blocks']- (players_teams['fgAttempted'] - players_teams['fgMade'])- (players_teams['ftAttempted'] - players_teams['ftMade'])- np.where(players_teams['GP'] == 0, 0, players_teams['turnovers'])) / players_teams['GP']
     
     players_teams = pd.merge(players_teams,players, left_on='playerID', right_on='bioID', how = 'inner')
@@ -123,6 +123,12 @@ def main():
        'd_dreb', 'd_reb', 'd_asts', 'd_pf', 'd_stl', 'd_to', 'd_blk', 'd_pts','tmORB', 'tmDRB', 'tmTRB', 'opptmORB', 'opptmDRB', 'opptmTRB'])
     print(teams.columns)
     
-    print(teams)   
+    print(teams)
+    
+    coaches['WLDifference']=coaches['won']-coaches['lost']
+    coaches = coaches.drop(columns=['won','lost','lgID'])
+    print(coaches)
+    #players_teams = players_teams.drop(columns=['playerID_y','lgID_y'])
+    print(players_teams)
     
 main()
