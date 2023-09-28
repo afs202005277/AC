@@ -91,4 +91,27 @@ def main():
     series_post['round'] = series_post['round'].replace(round_mapping)
     print()
 
+    teams['progress'] = teams.apply(lambda row:progress(row), axis = 1)
+    
+    teams = teams.drop(columns = ['firstRound', 'semis', 'finals','lgID','seeded','arena','attend','min'])
+    
+    
+    teams['confWLDifference'] = teams['confW']-teams['confL']
+    teams['awayWLDifference'] = teams['awayW']-teams['awayL']
+    teams['homeWLDifference'] = teams['homeW']-teams['homeL']
+    teams['gamesWLDifference'] = teams['won'] - teams['lost']
+    
+    teams = teams.drop(columns=['confW','confL','awayW','awayL','homeW','homeL','won','lost'])
+    
+    teams['offensive_performance'] = ((teams['o_pts']/(teams['o_fga']+0.44*teams['o_fta'])) + ((teams['o_fgm']+teams['o_3pm'])/(teams['o_fga']+teams['o_3pa'])) + (teams['o_asts']/(teams['o_to']+1))+teams['o_oreb'])
+    teams['defensive_performance'] = (((teams['d_fgm'] + teams['d_3pm']) / (teams['d_fga'] + 0.44 * teams['d_fta']))+((teams['d_fgm'] + teams['d_3pm']) / (teams['d_fga'] + teams['d_3pa']))+teams['d_dreb']+teams['d_stl']+teams['d_blk']-teams['d_pts'])
+    
+    teams = teams.drop(columns = ['o_fgm', 'o_fga', 'o_ftm', 'o_fta', 'o_3pm', 'o_3pa', 'o_oreb',
+       'o_dreb', 'o_reb', 'o_asts', 'o_pf', 'o_stl', 'o_to', 'o_blk', 'o_pts',
+       'd_fgm', 'd_fga', 'd_ftm', 'd_fta', 'd_3pm', 'd_3pa', 'd_oreb',
+       'd_dreb', 'd_reb', 'd_asts', 'd_pf', 'd_stl', 'd_to', 'd_blk', 'd_pts','tmORB', 'tmDRB', 'tmTRB', 'opptmORB', 'opptmDRB', 'opptmTRB'])
+    print(teams.columns)
+    
+    print(teams)   
+    
 main()
