@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from sklearn.preprocessing import LabelEncoder
 
     
 def main():
@@ -41,15 +42,12 @@ def main():
 
     # Converting colleges to an index
     unique_colleges = set(list(players['college'].unique()) + list(players['collegeOther'].unique()))
-    print(unique_colleges)
     college_mapping = {}
     for index, college in enumerate(unique_colleges):
         college_mapping[college] = index
 
     players['college'] = players['college'].replace(college_mapping)
     players['collegeOther'] = players['collegeOther'].replace(college_mapping)
-
-    print(players)
 
     # First Season and Last Season were always 0 so we decided to remove them
     players = players.drop(['firstseason', 'lastseason'], axis='columns')
@@ -65,9 +63,6 @@ def main():
     players['birthYear'] = players['birthDate'].dt.year
     players = players.drop('birthDate', axis='columns')
     print(players.loc[:, players.columns != 'bioID'].corr())
-
-    print("\n\n\n")
-    print(len(teams.columns))
     
     #remove divID that is NaN in all objects
     print(teams['divID'].isna().sum())
@@ -76,17 +71,24 @@ def main():
     #merge players and awards_players by bioID and playerID
     players = pd.merge(players,awards_players, left_on='bioID', right_on='playerID', how ='inner')
     del awards_players
-    print(players.info())
-    
     players_teams['EFF'] = (players_teams['points'] + players_teams['rebounds'] + players_teams['assists']+ players_teams['steals']+ players_teams['blocks']- (players_teams['fgAttempted'] - players_teams['fgMade'])- (players_teams['ftAttempted'] - players_teams['ftMade'])- np.where(players_teams['GP'] == 0, 0, players_teams['turnovers'])) / players_teams['GP']
     
     players_teams = pd.merge(players_teams,players, left_on='playerID', right_on='bioID', how = 'inner')
-    
-    print(players_teams['EFF'].head())
-    
-    
 
+    series_post.drop(['lgIDLoser', 'lgIDWinner'], inplace=True, axis='columns')
 
+    unique_teams = set(list(series_post['tmIDLoser'].unique()) + list(series_post['tmIDWinner'].unique()))
+    team_mapping = {}
+    for index, team in enumerate(unique_teams):
+        team_mapping[team] = index
 
+    series_post['tmIDLoser'] = series_post['tmIDLoser'].replace(team_mapping)
+    series_post['tmIDWinner'] = series_post['tmIDWinner'].replace(team_mapping)
+
+    label_encoder = LabelEncoder()
+    series_post['series'] = label_encoder.fit_transform(series_post['series'])
+    round_mapping = {'FR': 1, 'CF':2, 'F':3}
+    series_post['round'] = series_post['round'].replace(round_mapping)
+    print()
 
 main()
