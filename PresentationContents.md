@@ -24,6 +24,9 @@ In every Machine Learning project, the dataset preparation is a crucial step in 
 
 - Teams:
   - Removal of the divID attribute that is NAN in all rows of the table, therefore useless
+  - - Creation of new column 'progress' that contains the information of columns 'firstRound', 'semis' and 'finals' in the form of a float and removing those columns
+  - Creation of values to measure the difference between wins and loses and remove the single columns 
+  - Creation of columns to measure offensive and defensive performance of a team using the data about that and removing the single columns (higher performance = better team)
   - 
 *Project Objective:*
 
