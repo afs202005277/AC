@@ -147,9 +147,6 @@ def main():
                                 'd_fgm', 'd_fga', 'd_ftm', 'd_fta', 'd_3pm', 'd_3pa', 'd_oreb',
                                 'd_dreb', 'd_reb', 'd_asts', 'd_pf', 'd_stl', 'd_to', 'd_blk', 'd_pts', 'tmORB',
                                 'tmDRB', 'tmTRB', 'opptmORB', 'opptmDRB', 'opptmTRB'])
-    print(teams.columns)
-
-    print(teams)
 
     # Create shifted features for FGP, FTP, and PPG
     shifted_years = 3  # Number of previous years to consider
@@ -253,11 +250,8 @@ def main():
     # Add the predicted EFF values to the 'future_player_data' DataFrame
     future_player_data['Predicted_EFF_Next_Year'] = future_predictions
 
-    print(future_player_data.head())
-
     coaches['WLDifference'] = coaches['won'] - coaches['lost']
     coaches = coaches.drop(columns=['won', 'lost', 'lgID'])
-    print(players_teams)
 
 
 main()
