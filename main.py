@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.preprocessing import LabelEncoder
+import models
 
 
 def progress(row):
@@ -166,44 +167,13 @@ def main():
     # Select relevant features including EFF and the lagged features
     eff_columns = [f'EFF_Lag_{year}' for year in range(1, lag_years + 1)]
     features = lagged_features + eff_columns
-
-    # Define your target variable
     target = 'EFF'
-
-    # Create a feature matrix (X) and target vector (y)
-    X = players_teams[features]
-    y = players_teams[target]
-
-    # Models for predicting next years individual players performance
-
-    # Split the data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
-
-    # Choosing a model - RandomForestRegressor as an example (LinearRegression, GradientBoostingRegressor are other models)
-    from sklearn.ensemble import RandomForestRegressor
-
-    randomForestRegressorModel = RandomForestRegressor(n_estimators=100)
-
-    randomForestRegressorModel.fit(X_train, y_train)
-
-    y_pred = randomForestRegressorModel.predict(X_test)
-
-    # Calculate evaluation metrics
-    mae = mean_absolute_error(y_test, y_pred)
-    mse = mean_squared_error(y_test, y_pred)
-    rmse = np.sqrt(mse)
-    r2 = r2_score(y_test, y_pred)
-
-    # Print the evaluation metrics
-    print(f'Mean Absolute Error (MAE): {mae:.2f}')  # Means that on average the prediction is mae units off
-    print(f'Mean Squared Error (MSE): {mse:.2f}')  #
-    print(f'Root Mean Squared Error (RMSE): {rmse:.2f}')
-    print(f'R-squared (R²): {r2:.2f}')
+    X_train, X_test, y_train, y_test = models.split_data(players_teams[features], players_teams[target])
+    trained_models = models.run_all(X_train, X_test, y_train, y_test)
 
     # Feature Importance - understanding which features are important:
-
     # Access feature importances
-    feature_importances = randomForestRegressorModel.feature_importances_
+    feature_importances = trained_models['Random Forest Regressor'].feature_importances_
 
     # Create a DataFrame to display feature importances
     importance_df = pd.DataFrame({'Feature': features, 'Importance': feature_importances})
@@ -249,7 +219,7 @@ def main():
     future_features = lagged_features + eff_columns
 
     # Use the trained model to predict EFF for the next year
-    future_predictions = randomForestRegressorModel.predict(future_player_data[future_features])
+    future_predictions = trained_models['Random Forest Regressor'].predict(future_player_data[future_features])
 
     # Add the predicted EFF values to the 'future_player_data' DataFrame
     future_player_data['Predicted_EFF_Next_Year'] = future_predictions
