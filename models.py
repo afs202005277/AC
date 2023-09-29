@@ -103,6 +103,7 @@ def run_all(X_train, X_test, y_train, y_test):
         results.append({
             'Model': model_name,
             'Best Parameters': best_params,
+            'Best Score': grid_search.best_score_,
             'Mean Absolute Error': mae,
             'Mean Squared Error': mse,
             'Root Mean Squared Error': rmse,
