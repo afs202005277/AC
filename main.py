@@ -228,12 +228,13 @@ def main():
 
         # Extract the row corresponding to the most recent year for the player
         most_recent_data = players_teams[
-            (players_teams['playerID'] == player_id) & (players_teams['year'] == most_recent_year)]
+            (players_teams['playerID'] == player_id) & (players_teams['year'] == most_recent_year)].copy()
 
         # Calculate lagged features for this row (as you did in your previous code)
         for feat in ['FG_Percentage', 'FT_Percentage', 'PPG']:
             for year in range(1, shifted_years + 1):
-                most_recent_data[f'{feat}_Lag_{year}'] = most_recent_data[feat].shift(year)
+                new_column_name = f'{feat}_Lag_{year}'
+                most_recent_data[new_column_name] = most_recent_data[feat].shift(year)
 
         # Fill NaN values in the newly created columns with 0
         lagged_features = [f'{feat}_Lag_{year}' for feat in ['FG_Percentage', 'FT_Percentage', 'PPG'] for year in
