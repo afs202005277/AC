@@ -117,6 +117,10 @@ def main():
     series_post['tmIDLoser'] = series_post['tmIDLoser'].replace(team_mapping)
     series_post['tmIDWinner'] = series_post['tmIDWinner'].replace(team_mapping)
 
+    teams_post['tmID'] = teams_post['tmID'].replace(team_mapping)
+    teams_post['WinRate'] = teams_post['W'] / (teams_post['W'] + teams_post['L'])
+    teams_post.drop(['lgID', 'W', 'L'], inplace=True, axis='columns')
+
     label_encoder = LabelEncoder()
     series_post['series'] = label_encoder.fit_transform(series_post['series'])
     round_mapping = {'FR': 1, 'CF': 2, 'F': 3}
@@ -136,10 +140,10 @@ def main():
     teams = teams.drop(columns=['confW', 'confL', 'awayW', 'awayL', 'homeW', 'homeL', 'won', 'lost'])
 
     teams['offensive_performance'] = ((teams['o_pts'] / (teams['o_fga'] + 0.44 * teams['o_fta'])) + (
-                (teams['o_fgm'] + teams['o_3pm']) / (teams['o_fga'] + teams['o_3pa'])) + (
-                                                  teams['o_asts'] / (teams['o_to'] + 1)) + teams['o_oreb'])
+            (teams['o_fgm'] + teams['o_3pm']) / (teams['o_fga'] + teams['o_3pa'])) + (
+                                              teams['o_asts'] / (teams['o_to'] + 1)) + teams['o_oreb'])
     teams['defensive_performance'] = (((teams['d_fgm'] + teams['d_3pm']) / (teams['d_fga'] + 0.44 * teams['d_fta'])) + (
-                (teams['d_fgm'] + teams['d_3pm']) / (teams['d_fga'] + teams['d_3pa'])) + teams['d_dreb'] + teams[
+            (teams['d_fgm'] + teams['d_3pm']) / (teams['d_fga'] + teams['d_3pa'])) + teams['d_dreb'] + teams[
                                           'd_stl'] + teams['d_blk'] - teams['d_pts'])
 
     teams = teams.drop(columns=['o_fgm', 'o_fga', 'o_ftm', 'o_fta', 'o_3pm', 'o_3pa', 'o_oreb',
@@ -250,8 +254,11 @@ def main():
     # Add the predicted EFF values to the 'future_player_data' DataFrame
     future_player_data['Predicted_EFF_Next_Year'] = future_predictions
 
-    coaches['WLDifference'] = coaches['won'] - coaches['lost']
-    coaches = coaches.drop(columns=['won', 'lost', 'lgID'])
+    coaches['WLRatio'] = coaches['won'] / (coaches['won'] + coaches['lost'])
+    coaches['WLRatio_Post'] = coaches['post_wins'] / (coaches['post_wins'] + coaches['post_losses'])
+    coaches = coaches.drop(columns=['won', 'lost', 'post_wins', 'post_losses', 'lgID'])
+    coaches['tmID'] = coaches['tmID'].replace(team_mapping)
+    print()
 
 
 main()
