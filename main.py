@@ -168,7 +168,11 @@ def main():
     eff_columns = [f'EFF_Lag_{year}' for year in range(1, lag_years + 1)]
     features = lagged_features + eff_columns
     target = 'EFF'
-    X_train, X_test, y_train, y_test = models.split_data(players_teams[features], players_teams[target])
+    X_train, X_test, y_train, y_test = models.split_data(players_teams, 3, 7, target)
+    for idx, df in enumerate(X_train):
+        min_year = df['year'].min()
+        max_year = df['year'].max()
+        print(f"Min: {min_year}, Max: {max_year}. Testing: {X_test[idx]['year'].unique()}")
     trained_models = models.run_all(X_train, X_test, y_train, y_test)
 
     # Feature Importance - understanding which features are important:
