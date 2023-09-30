@@ -1,5 +1,5 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import LinearRegression, Ridge, Lasso
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.neural_network import MLPRegressor
@@ -8,6 +8,7 @@ from sklearn.metrics import (mean_absolute_error, mean_squared_error, r2_score)
 from math import sqrt
 import os
 import joblib
+from CustomCrossValidator import CustomCrossValidator
 
 regression_models = [
     {
@@ -74,12 +75,7 @@ def save_models(trained_models):
         joblib.dump(model, model_path)
 
 
-# TODO: BETTER SPLIT DATA
-def split_data(features, target):
-    return train_test_split(features, target, test_size=0.3)
-
-
-def run_all(X_train, X_test, y_train, y_test):
+def run_all(x_train, y_train, x_test, y_test, min_years, max_years, target_column):
     results = []
     trained_models = {}
 
@@ -89,11 +85,11 @@ def run_all(X_train, X_test, y_train, y_test):
         params = model_info['params']
         model_name = model_info['name']
 
-        grid_search = GridSearchCV(model, params, cv=5, n_jobs=-1)
-        grid_search.fit(X_train, y_train)
+        grid_search = GridSearchCV(model, params, cv=CustomCrossValidator(min_years, max_years, target_column), n_jobs=-1)
+        grid_search.fit(x_train, y_train)
         trained_model = grid_search.best_estimator_
         best_params = str(grid_search.best_params_)
-        y_pred = grid_search.predict(X_test)
+        y_pred = grid_search.predict(x_test)
 
         mae = mean_absolute_error(y_test, y_pred)
         mse = mean_squared_error(y_test, y_pred)
@@ -110,7 +106,8 @@ def run_all(X_train, X_test, y_train, y_test):
             'R-squared': r2
         })
         trained_models[model_name] = trained_model
-        print("Finished analysing " + model_name)
+        print("Finished analyzing " + model_name)
+
     results_df = pd.DataFrame(results)
     results_df.to_csv('results.csv', index=False)
     save_models(trained_models)
