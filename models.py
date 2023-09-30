@@ -1,5 +1,5 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import LinearRegression, Ridge, Lasso
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.neural_network import MLPRegressor
@@ -75,40 +75,7 @@ def save_models(trained_models):
         joblib.dump(model, model_path)
 
 
-def split_data(dataset, min_years, max_years, target_column):
-    dataset = dataset.sort_values(by='year')
-    years = dataset['year'].unique()
-    X_train_list, X_test_list, y_train_list, y_test_list = [], [], [], []
-
-    # Iterate through the dataset using a sliding window of years
-    for window_size in range(min_years, max_years + 1):
-        for i in range(max(years) - window_size + 1):  # PROBLEM: itera por todas as linhas do dataset. Tem de iterar por anos
-            # Define the start and end years for the window
-            start_year = i
-            end_year = start_year + window_size
-
-            # Extract the data for the sliding window
-            window_data = dataset[(dataset['year'] >= start_year) & (dataset['year'] < end_year)]
-
-            # Split the window data into features (X) and target (y)
-            X_window = window_data.drop(columns=[target_column])
-            y_window = window_data[target_column]
-
-            # Append the current window data to the lists
-            X_train_list.append(X_window)
-            y_train_list.append(y_window)
-
-            # Extract the data for the next year (outside the window)
-            next_year_data = dataset[dataset['year'] == end_year]
-            X_next_year = next_year_data.drop(columns=[target_column])
-            y_next_year = next_year_data[target_column]
-
-            X_test_list.append(X_next_year)
-            y_test_list.append(y_next_year)
-    return X_train_list, X_test_list, y_train_list, y_test_list
-
-
-def run_all(X_train, y_train):
+def run_all(x_train, y_train, x_test, y_test, min_years, max_years, target_column):
     results = []
     trained_models = {}
 
@@ -118,28 +85,26 @@ def run_all(X_train, y_train):
         params = model_info['params']
         model_name = model_info['name']
 
-        grid_search = GridSearchCV(
-            model, params, cv=CustomCrossValidator(), n_jobs=-1
-        )
-        grid_search.fit(X_train, y_train)
+        grid_search = GridSearchCV(model, params, cv=CustomCrossValidator(min_years, max_years, target_column), n_jobs=-1)
+        grid_search.fit(x_train, y_train)
         trained_model = grid_search.best_estimator_
         best_params = str(grid_search.best_params_)
-        # y_pred = grid_search.predict(X_test_list)
-        #
-        # mae = mean_absolute_error(y_test_list, y_pred)
-        # mse = mean_squared_error(y_test_list, y_pred)
-        # rmse = sqrt(mse)
-        # r2 = r2_score(y_test_list, y_pred)
-        #
-        # results.append({
-        #     'Model': model_name,
-        #     'Best Parameters': best_params,
-        #     'Best Score': grid_search.best_score_,
-        #     'Mean Absolute Error': mae,
-        #     'Mean Squared Error': mse,
-        #     'Root Mean Squared Error': rmse,
-        #     'R-squared': r2
-        # })
+        y_pred = grid_search.predict(x_test)
+
+        mae = mean_absolute_error(y_test, y_pred)
+        mse = mean_squared_error(y_test, y_pred)
+        rmse = sqrt(mse)
+        r2 = r2_score(y_test, y_pred)
+
+        results.append({
+            'Model': model_name,
+            'Best Parameters': best_params,
+            'Best Score': grid_search.best_score_,
+            'Mean Absolute Error': mae,
+            'Mean Squared Error': mse,
+            'Root Mean Squared Error': rmse,
+            'R-squared': r2
+        })
         trained_models[model_name] = trained_model
         print("Finished analyzing " + model_name)
 

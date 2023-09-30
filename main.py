@@ -1,7 +1,5 @@
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.preprocessing import LabelEncoder
 import models
 
@@ -17,6 +15,17 @@ def progress(row):
         return 2.5
     else:
         return 3
+
+
+def find_and_move_max_year_records(players_teams):
+    max_year = players_teams['year'].max()
+    max_year_records = players_teams[players_teams['year'] == max_year]
+    max_year_df = pd.DataFrame(max_year_records)
+    players_teams = players_teams[players_teams['year'] != max_year]
+    max_year_df.reset_index(drop=True, inplace=True)
+    players_teams.reset_index(drop=True, inplace=True)
+
+    return max_year_df, players_teams
 
 
 def main():
@@ -168,13 +177,14 @@ def main():
     eff_columns = [f'EFF_Lag_{year}' for year in range(1, lag_years + 1)]
     features = lagged_features + eff_columns + ['year']
     target = 'EFF'
-    X_train = players_teams[features]
+
+    last_year_records, players_teams = find_and_move_max_year_records(players_teams)
+
+    x_train = players_teams[features]
     y_train = players_teams[target]
-    # for idx, df in enumerate(X_train):
-    #     min_year = df['year'].min()
-    #     max_year = df['year'].max()
-    #     print(f"Min: {min_year}, Max: {max_year}. Testing: {X_test[idx]['year'].unique()}")
-    trained_models = models.run_all(X_train, y_train)
+    x_test = last_year_records[features]
+    y_test = last_year_records[target]
+    trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target)
 
     # Feature Importance - understanding which features are important:
     # Access feature importances
@@ -220,11 +230,8 @@ def main():
         # Append this row to the 'future_player_data' DataFrame
         future_player_data = pd.concat([future_player_data, most_recent_data])
 
-    # Select the relevant features for predicting EFF
-    future_features = lagged_features + eff_columns + ['year']
-
     # Use the trained model to predict EFF for the next year
-    future_predictions = trained_models['Random Forest Regressor'].predict(future_player_data[future_features])
+    future_predictions = trained_models['Random Forest Regressor'].predict(future_player_data[features])
 
     # Add the predicted EFF values to the 'future_player_data' DataFrame
     future_player_data['Predicted_EFF_Next_Year'] = future_predictions
