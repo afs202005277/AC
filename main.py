@@ -166,14 +166,15 @@ def main():
 
     # Select relevant features including EFF and the lagged features
     eff_columns = [f'EFF_Lag_{year}' for year in range(1, lag_years + 1)]
-    features = lagged_features + eff_columns
+    features = lagged_features + eff_columns + ['year']
     target = 'EFF'
-    X_train, X_test, y_train, y_test = models.split_data(players_teams, 3, 7, target)
-    for idx, df in enumerate(X_train):
-        min_year = df['year'].min()
-        max_year = df['year'].max()
-        print(f"Min: {min_year}, Max: {max_year}. Testing: {X_test[idx]['year'].unique()}")
-    trained_models = models.run_all(X_train, X_test, y_train, y_test)
+    X_train = players_teams[features]
+    y_train = players_teams[target]
+    # for idx, df in enumerate(X_train):
+    #     min_year = df['year'].min()
+    #     max_year = df['year'].max()
+    #     print(f"Min: {min_year}, Max: {max_year}. Testing: {X_test[idx]['year'].unique()}")
+    trained_models = models.run_all(X_train, y_train)
 
     # Feature Importance - understanding which features are important:
     # Access feature importances
@@ -220,7 +221,7 @@ def main():
         future_player_data = pd.concat([future_player_data, most_recent_data])
 
     # Select the relevant features for predicting EFF
-    future_features = lagged_features + eff_columns
+    future_features = lagged_features + eff_columns + ['year']
 
     # Use the trained model to predict EFF for the next year
     future_predictions = trained_models['Random Forest Regressor'].predict(future_player_data[future_features])

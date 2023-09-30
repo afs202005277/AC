@@ -108,7 +108,7 @@ def split_data(dataset, min_years, max_years, target_column):
     return X_train_list, X_test_list, y_train_list, y_test_list
 
 
-def run_all(X_train_list, X_test_list, y_train_list, y_test_list):
+def run_all(X_train, y_train):
     results = []
     trained_models = {}
 
@@ -119,27 +119,27 @@ def run_all(X_train_list, X_test_list, y_train_list, y_test_list):
         model_name = model_info['name']
 
         grid_search = GridSearchCV(
-            model, params, cv=CustomCrossValidator(X_train_list, y_train_list), n_jobs=-1
+            model, params, cv=CustomCrossValidator(), n_jobs=-1
         )
-        grid_search.fit(X_train_list, y_train_list)
+        grid_search.fit(X_train, y_train)
         trained_model = grid_search.best_estimator_
         best_params = str(grid_search.best_params_)
-        y_pred = grid_search.predict(X_test_list)
-
-        mae = mean_absolute_error(y_test_list, y_pred)
-        mse = mean_squared_error(y_test_list, y_pred)
-        rmse = sqrt(mse)
-        r2 = r2_score(y_test_list, y_pred)
-
-        results.append({
-            'Model': model_name,
-            'Best Parameters': best_params,
-            'Best Score': grid_search.best_score_,
-            'Mean Absolute Error': mae,
-            'Mean Squared Error': mse,
-            'Root Mean Squared Error': rmse,
-            'R-squared': r2
-        })
+        # y_pred = grid_search.predict(X_test_list)
+        #
+        # mae = mean_absolute_error(y_test_list, y_pred)
+        # mse = mean_squared_error(y_test_list, y_pred)
+        # rmse = sqrt(mse)
+        # r2 = r2_score(y_test_list, y_pred)
+        #
+        # results.append({
+        #     'Model': model_name,
+        #     'Best Parameters': best_params,
+        #     'Best Score': grid_search.best_score_,
+        #     'Mean Absolute Error': mae,
+        #     'Mean Squared Error': mse,
+        #     'Root Mean Squared Error': rmse,
+        #     'R-squared': r2
+        # })
         trained_models[model_name] = trained_model
         print("Finished analyzing " + model_name)
 
