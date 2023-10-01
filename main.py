@@ -151,10 +151,10 @@ def main():
 
     teams['offensive_performance'] = ((teams['o_pts'] / (teams['o_fga'] + 0.44 * teams['o_fta'])) + (
             (teams['o_fgm'] + teams['o_3pm']) / (teams['o_fga'] + teams['o_3pa'])) + (
-                                              teams['o_asts'] / (teams['o_to'] + 1)) + teams['o_oreb'])
+                                              teams['o_asts'] / (teams['o_to'] + 1)) + teams['o_oreb'])/teams['GP']
     teams['defensive_performance'] = (((teams['d_fgm'] + teams['d_3pm']) / (teams['d_fga'] + 0.44 * teams['d_fta'])) + (
             (teams['d_fgm'] + teams['d_3pm']) / (teams['d_fga'] + teams['d_3pa'])) + teams['d_dreb'] + teams[
-                                          'd_stl'] + teams['d_blk'] - teams['d_pts'])
+                                          'd_stl'] + teams['d_blk'] - teams['d_pts'])/teams['GP']
 
     teams = teams.drop(columns=['o_fgm', 'o_fga', 'o_ftm', 'o_fta', 'o_3pm', 'o_3pa', 'o_oreb',
                                 'o_dreb', 'o_reb', 'o_asts', 'o_pf', 'o_stl', 'o_to', 'o_blk', 'o_pts',
@@ -239,8 +239,34 @@ def main():
     coaches['WLRatio'] = coaches['won'] / (coaches['won'] + coaches['lost'])
     coaches['WLRatio_Post'] = coaches['post_wins'] / (coaches['post_wins'] + coaches['post_losses'])
     coaches = coaches.drop(columns=['won', 'lost', 'post_wins', 'post_losses', 'lgID'])
-    coaches['tmID'] = coaches['tmID'].replace(team_mapping)
+    #coaches['tmID'] = coaches['tmID'].replace(team_mapping)
     print()
+    
+    team_eff_stats = players_teams.groupby(['year', 'tmID'])['EFF'].agg(['sum', 'count']).reset_index()
+
+    # Rename the columns to 'EFF_Sum' and 'EFF_Count'
+    team_eff_stats.rename(columns={'sum': 'EFF_Sum', 'count': 'EFF_Count'}, inplace=True)
+
+    # Merge 'team_eff_stats' with 'teams' based on 'year' and 'tmID'
+    teams = pd.merge(teams, team_eff_stats, on=['year', 'tmID'], how='left')
+
+    # Calculate the 'TeamScore' by dividing 'EFF_Sum' by 'EFF_Count'
+    teams['TeamScore'] = teams['EFF_Sum'] / teams['EFF_Count']
+
+    # Drop the 'EFF_Sum' and 'EFF_Count' columns if not needed
+    teams.drop(['EFF_Sum', 'EFF_Count'], axis=1, inplace=True)
+    
+    teams = pd.merge(teams, coaches[['year', 'tmID', 'WLRatio']], on=['year', 'tmID'], how='left')
+
+# Create the new column 'WLRatioScaled' by multiplying 'WLRatio' by 10
+    teams['coachScore'] = teams['WLRatio'] * 10
+    teams.drop(['WLRatio'],axis = 1, inplace = True)
+    
+    print(teams)
+    
+    print(coaches)
+    
+
 
 
 main()
