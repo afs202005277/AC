@@ -142,10 +142,10 @@ def main():
 
     teams = teams.drop(columns=['firstRound', 'semis', 'finals', 'lgID', 'seeded', 'arena', 'attend', 'min'])
 
-    teams['confWLDifference'] = teams['confW'] - teams['confL']
-    teams['awayWLDifference'] = teams['awayW'] - teams['awayL']
-    teams['homeWLDifference'] = teams['homeW'] - teams['homeL']
-    teams['gamesWLDifference'] = teams['won'] - teams['lost']
+    teams['confWLRatio'] = teams['confW'] / (teams['confW']+ teams['confL'])
+    teams['awayWLRatio'] = teams['awayW'] /  (teams['awayW'] + teams['awayL'])
+    teams['homeWLRatio'] = teams['homeW'] /( teams['homeW'] +teams['homeL'])
+    teams['gamesWLRatio'] = teams['won'] / ( teams['won'] +teams['lost'])
 
     teams = teams.drop(columns=['confW', 'confL', 'awayW', 'awayL', 'homeW', 'homeL', 'won', 'lost'])
 
@@ -184,20 +184,20 @@ def main():
     y_train = players_teams[target]
     x_test = last_year_records[features]
     y_test = last_year_records[target]
-    trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target)
+    #trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target)
 
     # Feature Importance - understanding which features are important:
     # Access feature importances
-    feature_importances = trained_models['Random Forest Regressor'].feature_importances_
+    #feature_importances = trained_models['Random Forest Regressor'].feature_importances_
 
     # Create a DataFrame to display feature importances
-    importance_df = pd.DataFrame({'Feature': features, 'Importance': feature_importances})
+    #importance_df = pd.DataFrame({'Feature': features, 'Importance': feature_importances})
 
     # Sort the DataFrame by importance in descending order
-    importance_df = importance_df.sort_values(by='Importance', ascending=False)
+    #importance_df = importance_df.sort_values(by='Importance', ascending=False)
 
     # Print or visualize the feature importances
-    print(importance_df)
+    #print(importance_df)
 
     # Creating dataframe with the next years predicted EFF for each player
 
@@ -231,10 +231,10 @@ def main():
         future_player_data = pd.concat([future_player_data, most_recent_data])
 
     # Use the trained model to predict EFF for the next year
-    future_predictions = trained_models['Random Forest Regressor'].predict(future_player_data[features])
+    #future_predictions = trained_models['Random Forest Regressor'].predict(future_player_data[features])
 
     # Add the predicted EFF values to the 'future_player_data' DataFrame
-    future_player_data['Predicted_EFF_Next_Year'] = future_predictions
+    #future_player_data['Predicted_EFF_Next_Year'] = future_predictions
 
     coaches['WLRatio'] = coaches['won'] / (coaches['won'] + coaches['lost'])
     coaches['WLRatio_Post'] = coaches['post_wins'] / (coaches['post_wins'] + coaches['post_losses'])
@@ -262,11 +262,6 @@ def main():
     teams['coachScore'] = teams['WLRatio'] * 10
     teams.drop(['WLRatio'],axis = 1, inplace = True)
     
-    print(teams)
     
-    print(coaches)
-    
-
-
 
 main()
