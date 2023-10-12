@@ -78,7 +78,7 @@ opptmDRB': Opponent's Team Defensive Rebounds (the total number of defensive reb
 'arena': The name of the arena where the team plays its home games.
 
 PLAYERS_TEAMS:
-assists': Assists (the number of times a player assists in making a basket or scoring).
+'assists': Assists (the number of times a player assists in making a basket or scoring).
 'blocks': Blocks (the number of times a player blocks an opponent's shot attempt).
 'dq': Disqualifications (the number of times a player is disqualified from a game).
 'dRebounds': Defensive Rebounds (the number of defensive rebounds grabbed by a player).
