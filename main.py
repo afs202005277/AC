@@ -113,6 +113,8 @@ def main():
         players_teams[f'EFF_Lag_{year}'] = players_teams.groupby('playerID')['EFF'].shift(year)
     players_teams[[f'EFF_Lag_{year}' for year in range(1, lag_years + 1)]] = players_teams[
         [f'EFF_Lag_{year}' for year in range(1, lag_years + 1)]].fillna(0)
+    
+    #print((players_teams[['playerID','year','EFF','EFF_Lag_1','EFF_Lag_2','EFF_Lag_3']].sort_values(by='playerID')).head(30))
 
     # Calculate Field Goal Percentage (FG%), Free Throw Percentage (FT%), and Points Per Game (PPG)
     players_teams['FG_Percentage'] = (players_teams['fgMade'] / players_teams['fgAttempted']) * 100
@@ -149,6 +151,11 @@ def main():
     teams['awayWLRatio'] = teams['awayW'] / (teams['awayW'] + teams['awayL'])
     teams['homeWLRatio'] = teams['homeW'] / (teams['homeW'] + teams['homeL'])
     teams['gamesWLRatio'] = teams['won'] / (teams['won'] + teams['lost'])
+    
+    for year in range(1, lag_years + 1):
+        teams[f'gamesWLRatio_Lag_{year}'] = teams.groupby('tmID')['gamesWLRatio'].shift(year)
+    teams[[f'gamesWLRatio_Lag_{year}' for year in range(1, lag_years + 1)]] = teams[
+        [f'gamesWLRatio_Lag_{year}' for year in range(1, lag_years + 1)]].fillna(-1)
 
     teams = teams.drop(columns=['confW', 'confL', 'awayW', 'awayL', 'homeW', 'homeL', 'won', 'lost'])
 
@@ -170,6 +177,8 @@ def main():
     for feat in ['FG_Percentage', 'FT_Percentage', 'PPG']:
         for year in range(1, shifted_years + 1):
             players_teams[f'{feat}_Lag_{year}'] = players_teams.groupby('playerID')[feat].shift(year)
+    
+    #print((players_teams[['playerID','year','FG_Percentage','FG_Percentage_Lag_1','FG_Percentage_Lag_2','FG_Percentage_Lag_3']].sort_values(by='playerID')).head(50))
 
     # Fill NaN values in the newly created columns with 0
     lagged_features = [f'{feat}_Lag_{year}' for feat in ['FG_Percentage', 'FT_Percentage', 'PPG'] for year in
@@ -187,20 +196,20 @@ def main():
     y_train = players_teams[target]
     x_test = last_year_records[features]
     y_test = last_year_records[target]
-    trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target)
+    #trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target)
 
     # Feature Importance - understanding which features are important:
     # Access feature importances
-    feature_importances = trained_models['Random Forest Regressor'].feature_importances_
+    #feature_importances = trained_models['Random Forest Regressor'].feature_importances_
 
     # Create a DataFrame to display feature importances
-    importance_df = pd.DataFrame({'Feature': features, 'Importance': feature_importances})
+    #importance_df = pd.DataFrame({'Feature': features, 'Importance': feature_importances})
 
     # Sort the DataFrame by importance in descending order
-    importance_df = importance_df.sort_values(by='Importance', ascending=False)
+    #importance_df = importance_df.sort_values(by='Importance', ascending=False)
 
     # Print or visualize the feature importances
-    print(importance_df)
+    #print(importance_df)
 
     # Creating dataframe with the next years predicted EFF for each player
 
@@ -234,11 +243,14 @@ def main():
         future_player_data = pd.concat([future_player_data, most_recent_data])
 
     # Use the trained model to predict EFF for the next year
-    future_predictions = trained_models['Random Forest Regressor'].predict(future_player_data[features])
+    #future_predictions = trained_models['Random Forest Regressor'].predict(future_player_data[features])
 
     # Add the predicted EFF values to the 'future_player_data' DataFrame
-    future_player_data['Predicted_EFF_Next_Year'] = future_predictions
+    #future_player_data['Predicted_EFF_Next_Year'] = future_predictions
+    
+    #players_teams = pd.merge(players_teams, future_player_data, left_on='playerID', right_on = 'playerId', how='left')
 
+    
     coaches['WLRatio'] = coaches['won'] / (coaches['won'] + coaches['lost'])
     coaches['WLRatio_Post'] = coaches['post_wins'] / (coaches['post_wins'] + coaches['post_losses'])
     coaches = coaches.drop(columns=['won', 'lost', 'post_wins', 'post_losses', 'lgID'])
@@ -255,6 +267,11 @@ def main():
     # Calculate the 'TeamScore' by dividing 'EFF_Sum' by 'EFF_Count'
     teams['TeamScore'] = teams['EFF_Sum'] / teams['EFF_Count']
 
+    for year in range(1, lag_years + 1):
+        teams[f'TeamScore_Lag_{year}'] = teams.groupby('tmID')['TeamScore'].shift(year)
+    teams[[f'TeamScore_Lag_{year}' for year in range(1, lag_years + 1)]] = teams[
+        [f'TeamScore_Lag_{year}' for year in range(1, lag_years + 1)]].fillna(-1)
+    
     # Drop the 'EFF_Sum' and 'EFF_Count' columns if not needed
     teams.drop(['EFF_Sum', 'EFF_Count'], axis=1, inplace=True)
 
@@ -262,7 +279,12 @@ def main():
 
     # Create the new column 'WLRatioScaled' by multiplying 'WLRatio' by 10
     teams['coachScore'] = teams['WLRatio'] * 10
-    teams.drop(['WLRatio'], axis=1, inplace=True)
-
+    teams.drop(['WLRatio'],axis = 1, inplace = True)
+    
+    #possessions = players_teams['fgAttempted']-players_teams['oRebounds']+players_teams['turnovers'] + 0.44 * players_teams['ftAttempted']
+    #players_teams['ORating'] = players_teams['points']*100/possessions
+    
+    print(teams[['year', 'tmID', 'gamesWLRatio', 'gamesWLRatio_Lag_1','gamesWLRatio_Lag_2','gamesWLRatio_Lag_3']].head(30))
+    #print(teams.columns)
 
 main()
