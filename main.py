@@ -111,8 +111,9 @@ def main():
     lag_years = 3
     for year in range(1, lag_years + 1):
         players_teams[f'EFF_Lag_{year}'] = players_teams.groupby('playerID')['EFF'].shift(year)
-    players_teams[[f'EFF_Lag_{year}' for year in range(1, lag_years + 1)]] = players_teams[
-        [f'EFF_Lag_{year}' for year in range(1, lag_years + 1)]].fillna(0)
+        players_teams[f'DPR_Lag_{year}'] = players_teams.groupby('playerID')['DPR'].shift(year)
+    players_teams[[f'EFF_Lag_{year}' for year in range(1, lag_years + 1)]] = players_teams[[f'EFF_Lag_{year}' for year in range(1, lag_years + 1)]].fillna(0)
+    players_teams[[f'DPR_Lag_{year}' for year in range(1, lag_years + 1)]] = players_teams[[f'DPR_Lag_{year}' for year in range(1, lag_years + 1)]].fillna(0)
 
     # Calculate Field Goal Percentage (FG%), Free Throw Percentage (FT%), and Points Per Game (PPG)
     players_teams['FG_Percentage'] = (players_teams['fgMade'] / players_teams['fgAttempted']) * 100
@@ -178,13 +179,14 @@ def main():
 
     # Select relevant features including EFF and the lagged features
     eff_columns = [f'EFF_Lag_{year}' for year in range(1, lag_years + 1)]
-    features = lagged_features + eff_columns + ['year']
+    dpr_columns = [f'DPR_Lag_{year}' for year in range(1, lag_years + 1)]
+    features = lagged_features + eff_columns + dpr_columns + ['year']
     target = 'EFF'
 
-    last_year_records, players_teams = find_and_move_max_year_records(players_teams)
+    last_year_records, players_teams_without_last = find_and_move_max_year_records(players_teams)
 
-    x_train = players_teams[features]
-    y_train = players_teams[target]
+    x_train = players_teams_without_last[features]
+    y_train = players_teams_without_last[target]
     x_test = last_year_records[features]
     y_test = last_year_records[target]
     trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target)
@@ -208,7 +210,7 @@ def main():
     most_recent_years = players_teams.groupby('playerID')['year'].max().reset_index()
 
     # Create the 'future_player_data' DataFrame with columns matching your original data
-    future_player_data = pd.DataFrame(columns=players_teams.columns)
+    future_player_data = pd.DataFrame(columns=players_teams_without_last.columns)
 
     # Iterate through each player to get the most recent data
     for _, player_row in most_recent_years.iterrows():
@@ -216,8 +218,8 @@ def main():
         most_recent_year = player_row['year']
 
         # Extract the row corresponding to the most recent year for the player
-        most_recent_data = players_teams[
-            (players_teams['playerID'] == player_id) & (players_teams['year'] == most_recent_year)].copy()
+        most_recent_data = players_teams_without_last[
+            (players_teams_without_last['playerID'] == player_id) & (players_teams_without_last['year'] == most_recent_year)].copy()
 
         # Calculate lagged features for this row (as you did in your previous code)
         for feat in ['FG_Percentage', 'FT_Percentage', 'PPG']:
@@ -238,6 +240,26 @@ def main():
 
     # Add the predicted EFF values to the 'future_player_data' DataFrame
     future_player_data['Predicted_EFF_Next_Year'] = future_predictions
+    last_year_records_dpr = last_year_records.copy()
+    # last_year_records_dpr['Predicted_EFF_Next_Year'] = future_predictions
+    features += ['EFF']
+    # PREDICT DPR NEXT YEAR
+    target = 'DPR'
+    x_train = players_teams_without_last[features]
+    y_train = players_teams_without_last[target]
+    x_test = last_year_records_dpr[features]
+    y_test = last_year_records_dpr[target]
+
+    trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target)
+    feature_importances = trained_models['Random Forest Regressor'].feature_importances_
+
+    importance_df = pd.DataFrame({'Feature': features, 'Importance': feature_importances})
+    importance_df = importance_df.sort_values(by='Importance', ascending=False)
+
+    # Print or visualize the feature importances
+    print(importance_df)
+
+
 
     coaches['WLRatio'] = coaches['won'] / (coaches['won'] + coaches['lost'])
     coaches['WLRatio_Post'] = coaches['post_wins'] / (coaches['post_wins'] + coaches['post_losses'])

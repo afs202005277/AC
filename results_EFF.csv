@@ -1,0 +1,2 @@
+Model,Best Parameters,Best Score,Mean Absolute Error,Mean Squared Error,Root Mean Squared Error,R-squared
+Random Forest Regressor_EFF,"{'max_depth': None, 'min_samples_leaf': 1, 'min_samples_split': 2, 'n_estimators': 50}",0.7243114880360996,2.511432164421143,9.981439763615018,3.15934166617272,0.6093843144164357

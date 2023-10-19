@@ -1,0 +1,2 @@
+Model,Best Parameters,Best Score,Mean Absolute Error,Mean Squared Error,Root Mean Squared Error,R-squared
+Random Forest Regressor_DPR,"{'max_depth': None, 'min_samples_leaf': 1, 'min_samples_split': 2, 'n_estimators': 50}",0.966231370551369,149.04621615156873,42784.52728631992,206.8442101832196,0.8027185587648056
