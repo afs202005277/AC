@@ -348,6 +348,9 @@ def create_lagged_features_teams(teams, features_to_be_lagged, lag_years):
                        range(1, lag_years + 1)]
     teams[lagged_features] = teams[lagged_features].fillna(-1)
 
+    # ISTO ESTÁ UM BOCADO CHAPADO AQUI... TEM DE SE MUDAR (OU NAO)
+    teams[[i for i in lagged_features if "playoff" in i]] = teams[[i for i in lagged_features if "playoff" in i]].fillna(0.5)
+
     return teams
 
 def models_train_and_test_teams(teams, features, target):
