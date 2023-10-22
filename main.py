@@ -28,6 +28,7 @@ def find_and_move_max_year_records(players_teams):
 
     return max_year_df, players_teams
 
+
 def initial_data_load():
     print("Initial Data Load")
     awards_players = pd.read_csv('./basketballPlayoffs/awards_players.csv')
@@ -49,6 +50,7 @@ def initial_data_load():
     }
 
     return dataframes_dict
+
 
 def player_data_cleanup(players):
     print("Player Data Cleanup")
@@ -81,12 +83,14 @@ def player_data_cleanup(players):
 
     return players
 
+
 def college_mapping(unique_colleges):
     college_mapping = {}
     for index, college in enumerate(unique_colleges):
         college_mapping[college] = index
 
     return college_mapping
+
 
 def team_mapping(unique_teams):
     team_mapping = {}
@@ -95,9 +99,11 @@ def team_mapping(unique_teams):
 
     return team_mapping
 
+
 def position_mapping(unique_pos):
     pos_mapping = {pos: ind for ind, pos in enumerate(unique_pos)}
     return pos_mapping
+
 
 def merge_players_awards(players, awards_players):
     print("Merge Players Awards")
@@ -112,6 +118,7 @@ def merge_players_awards(players, awards_players):
     players['numAwards'].fillna(0, inplace=True)
 
     return players
+
 
 def feature_creation_players_teams(players_teams):
     print("Feature Creation - Players Teams")
@@ -137,12 +144,14 @@ def feature_creation_players_teams(players_teams):
 
     return players_teams
 
+
 def merge_players_teams(players_teams, players):
     print("Merge Player Teams")
     players_teams = pd.merge(players_teams, players, left_on='playerID', right_on='bioID',
                              how='inner').drop_duplicates()
 
     return players_teams
+
 
 def series_post_data_cleanup(series_post, team_mapping):
     print("Series Post Data Cleanup")
@@ -156,6 +165,7 @@ def series_post_data_cleanup(series_post, team_mapping):
     series_post['round'] = series_post['round'].replace(round_mapping)
 
     return series_post
+
 
 def create_lagged_features_players(players_teams, features_to_be_lagged, lag_years):
     print("Create Lagged Features Players")
@@ -171,6 +181,7 @@ def create_lagged_features_players(players_teams, features_to_be_lagged, lag_yea
 
     return players_teams
 
+
 def models_train_and_test_players(players_teams, features, target):
     print("Models Running - Players")
     last_year_records, players_train_teams = find_and_move_max_year_records(players_teams)
@@ -179,14 +190,15 @@ def models_train_and_test_players(players_teams, features, target):
     y_train = players_train_teams[target]
     x_test = last_year_records[features]
     y_test = last_year_records[target]
-    trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target)
+    trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target, "Players")
 
     # Feature Importance - understanding which features are important:
 
-    # Access feature importances
+    # Access feature importance's
     feature_importances = trained_models['Random Forest Regressor'].feature_importances_
 
-    # Create a DataFrame to display feature importances
+    features.remove('year')
+    # Create a DataFrame to display feature importance's
     importance_df = pd.DataFrame({'Feature': features, 'Importance': feature_importances})
 
     # Sort the DataFrame by importance in descending order
@@ -196,6 +208,7 @@ def models_train_and_test_players(players_teams, features, target):
     print(importance_df)
 
     return trained_models
+
 
 def models_predict_future_players(players_teams, features, features_to_be_lagged, model, lag_years):
     print("Models Predicting - Players")
@@ -209,7 +222,8 @@ def models_predict_future_players(players_teams, features, features_to_be_lagged
 
     # Iterate over unique player IDs and add new rows to the list
     for _, row in most_recent_years.iterrows():
-        tmp_data = players_teams.loc[(players_teams['playerID'] == row['playerID']) & (players_teams['year'] == row['year'])]
+        tmp_data = players_teams.loc[
+            (players_teams['playerID'] == row['playerID']) & (players_teams['year'] == row['year'])]
         team_id = tmp_data.at[tmp_data.index[0], 'tmID']
         player_id = row['playerID']
         max_year = row['year']
@@ -239,6 +253,7 @@ def models_predict_future_players(players_teams, features, features_to_be_lagged
 
     return future_player_data
 
+
 def feature_creation_coaches(coaches):
     coaches['WLRatio'] = coaches['won'] / (coaches['won'] + coaches['lost'])
     coaches['WLRatio_Post'] = coaches['post_wins'] / (coaches['post_wins'] + coaches['post_losses'])
@@ -246,9 +261,8 @@ def feature_creation_coaches(coaches):
     return coaches
 
 
-def coaches_data_cleanup(coaches, team_map):
+def coaches_data_cleanup(coaches):
     coaches = coaches.drop(columns=['won', 'lost', 'post_wins', 'post_losses', 'lgID'])
-    coaches['tmID'] = coaches['tmID'].replace(team_map)
 
     return coaches
 
@@ -277,6 +291,9 @@ def feature_creation_team_score(teams, players_teams, teams_map=None):
 
     # Rename the columns to 'EFF_Sum' and 'EFF_Count'
     team_eff_stats.rename(columns={'sum': 'EFF_Sum', 'count': 'EFF_Count'}, inplace=True)
+
+    if teams_map:
+        team_eff_stats['tmID'] = team_eff_stats['tmID'].replace(teams_map)
 
     # Merge 'team_eff_stats' with 'teams' based on 'year' and 'tmID'
     teams = pd.merge(teams, team_eff_stats, on=['year', 'tmID'], how='left')
@@ -314,6 +331,7 @@ def feature_creation_teams(teams, players_teams):
 
     return teams
 
+
 def merge_coaches(teams, coaches):
     teams = pd.merge(teams, coaches[['year', 'tmID', 'WLRatio']], on=['year', 'tmID'], how='left')
 
@@ -336,12 +354,13 @@ def teams_data_cleanup(teams, team_map):
 
     return teams
 
+
 def create_lagged_features_teams(teams, features_to_be_lagged, lag_years):
     print("Create Lagged Features Teams")
     # Create lagged features
     for feat in features_to_be_lagged:
         for year in range(1, lag_years + 1):
-            teams[f'{feat}_Lag_{year}'] = teams.groupby('franchID')[feat].shift(year)
+            teams[f'{feat}_Lag_{year}'] = teams.groupby('tmID')[feat].shift(year)
 
     # Fill NaN values in the newly created columns with 0
     lagged_features = [f'{feat}_Lag_{year}' for feat in features_to_be_lagged for year in
@@ -349,19 +368,20 @@ def create_lagged_features_teams(teams, features_to_be_lagged, lag_years):
     teams[lagged_features] = teams[lagged_features].fillna(-1)
 
     # ISTO ESTÁ UM BOCADO CHAPADO AQUI... TEM DE SE MUDAR (OU NAO)
-    teams[[i for i in lagged_features if "playoff" in i]] = teams[[i for i in lagged_features if "playoff" in i]].fillna(0.5)
+    teams[[i for i in lagged_features if "playoff" in i]] = teams[
+        [i for i in lagged_features if "playoff" in i]].fillna(0.5)
 
     return teams
+
 
 def models_train_and_test_teams(teams, features, target):
     print("Models Running - Teams")
     this_year_records, train_teams = find_and_move_max_year_records(teams)
-
     x_train = train_teams[features]
     y_train = train_teams[target]
     x_test = this_year_records[features]
     y_test = this_year_records[target]
-    trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target)
+    trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target, "Teams")
 
     # Feature Importance - understanding which features are important:
 
@@ -369,6 +389,7 @@ def models_train_and_test_teams(teams, features, target):
     feature_importances = trained_models['Random Forest Regressor'].feature_importances_
 
     # Create a DataFrame to display feature importances
+    features.remove('year')
     importance_df = pd.DataFrame({'Feature': features, 'Importance': feature_importances})
 
     # Sort the DataFrame by importance in descending order
@@ -379,28 +400,29 @@ def models_train_and_test_teams(teams, features, target):
 
     return trained_models
 
+
 def models_predict_future_teams(teams, players_teams, teams_map, features, features_to_be_lagged, model, lag_years):
     print("Models Predicting - Teams")
     # Creating dataframe with the next years predicted EFF for each player
 
     # Find the most recent year for each team
-    most_recent_years = teams.groupby('franchID')['year'].max().reset_index()
+    most_recent_years = teams.groupby('tmID')['year'].max().reset_index()
 
     # Create an empty list to store new rows
     new_rows = []
 
     # Iterate over unique team IDs and add new rows to the list
     for _, row in most_recent_years.iterrows():
-        tmp_data = teams.loc[(teams['franchID'] == row['franchID']) & (teams['year'] == row['year'])]
+        tmp_data = teams.loc[(teams['tmID'] == row['tmID']) & (teams['year'] == row['year'])]
         team_id = tmp_data.at[tmp_data.index[0], 'tmID']
-        franch_id = row['franchID']
+        franch_id = row['tmID']
         conf_id = tmp_data.at[tmp_data.index[0], 'confID']
         name = tmp_data.at[tmp_data.index[0], 'name']
         max_year = row['year']
         next_year = max_year + 1
 
         # Create a new row with the next year, team ID, franch id, conf id and name, leaving other columns blank
-        new_row = [next_year, team_id, franch_id, conf_id] + [np.nan]*2 + [name] + [np.nan] * (teams.shape[1] - 7)
+        new_row = [next_year, team_id, franch_id, conf_id] + [np.nan] * 2 + [name] + [np.nan] * (teams.shape[1] - 7)
 
         # Append the new row to the list
         new_rows.append(new_row)
@@ -424,12 +446,12 @@ def models_predict_future_teams(teams, players_teams, teams_map, features, featu
 
     max_year_data['Predicted_Playoff'] = future_predictions
 
-    future_team_data = pd.merge(future_team_data, max_year_data, on=['year', 'franchID', 'tmID', 'name'], how='left')
+    future_team_data = pd.merge(future_team_data, max_year_data, on=['year', 'tmID', 'tmID', 'name'], how='left')
 
     return future_team_data
 
-def main():
 
+def main():
     # Load data from CSVs
     dataframes_dict = initial_data_load()
 
@@ -448,7 +470,7 @@ def main():
     # creating new features to help predict the EFF for the next year:
 
     # Mapping teams to indexes
-    team_map = team_mapping(set(list(dataframes_dict['series_post']['tmIDLoser'].unique()) + list(dataframes_dict['series_post']['tmIDWinner'].unique())))
+    team_map = team_mapping(set(list(dataframes_dict['teams']['tmID'].unique())))
 
     # Clean up data on series_post dataframe - USELESS????
     dataframes_dict['series_post'] = series_post_data_cleanup(dataframes_dict['series_post'], team_map)
@@ -462,54 +484,48 @@ def main():
 
     lag_years_players = 3
     features_to_be_lagged = ['FG_Percentage', 'FT_Percentage', 'PPG', 'EFF']
-    dataframes_dict['players_teams'] = create_lagged_features_players(dataframes_dict['players_teams'], features_to_be_lagged, lag_years_players)
+    dataframes_dict['players_teams'] = create_lagged_features_players(dataframes_dict['players_teams'],
+                                                                      features_to_be_lagged, lag_years_players)
 
     # Select relevant features including lagged features
     features = [f'{feat}_Lag_{year}' for feat in features_to_be_lagged for year in
                 range(1, lag_years_players + 1)] + ['year']
     target = 'EFF'
-    #trained_models_players = models_train_and_test_players(dataframes_dict['players_teams'], features, target)
-    trained_models_players = {}
-    trained_models_players['Random Forest Regressor'] = joblib.load('models/RandomForestRegressorPlayers.joblib')
+    trained_models_players = models_train_and_test_players(dataframes_dict['players_teams'], features, target)
 
     dataframes_dict['players_teams'] = models_predict_future_players(dataframes_dict['players_teams'], features,
-                                                       features_to_be_lagged,
-                                                       trained_models_players['Random Forest Regressor'],
-                                                       lag_years_players)
-
+                                                                     features_to_be_lagged,
+                                                                     trained_models_players['Random Forest Regressor'],
+                                                                     lag_years_players)
 
     print("PLAYERS MODELS DONE")
 
     dataframes_dict['coaches'] = feature_creation_coaches(dataframes_dict['coaches'])
 
-    dataframes_dict['coaches'] = coaches_data_cleanup(dataframes_dict['coaches'], team_map)
+    dataframes_dict['coaches'] = coaches_data_cleanup(dataframes_dict['coaches'])
 
-    # DEPOIS DESTE MERGE APARECEM 2 EQUIPAS CUJO TEAM ID NÃO É UM NUMERO - TIVE THE USAR franchID PARA FAZER GROUP BY
     dataframes_dict['teams'] = merge_coaches(dataframes_dict['teams'], dataframes_dict['coaches'])
 
     dataframes_dict['teams'] = feature_creation_teams(dataframes_dict['teams'], dataframes_dict['players_teams'])
 
     dataframes_dict['teams'] = teams_data_cleanup(dataframes_dict['teams'], team_map)
 
-
     lag_years_teams = 3
-    features_to_be_lagged = ['PredictedTeamScore', 'defensive_performance', 'offensive_performance', 'gamesWLRatio', 'homeWLRatio', 'awayWLRatio', 'confWLRatio', 'progress', 'playoff']
+    features_to_be_lagged = ['PredictedTeamScore', 'defensive_performance', 'offensive_performance', 'gamesWLRatio',
+                             'homeWLRatio', 'awayWLRatio', 'confWLRatio', 'progress', 'playoff']
     dataframes_dict['teams'] = create_lagged_features_teams(dataframes_dict['teams'],
-                                                                      features_to_be_lagged, lag_years_teams)
+                                                            features_to_be_lagged, lag_years_teams)
 
     # Select relevant features including lagged features
     features = [f'{feat}_Lag_{year}' for feat in features_to_be_lagged for year in
                 range(1, lag_years_players + 1)] + ['year', 'PredictedTeamScore']
     target = 'playoff'
-    #trained_models_teams = models_train_and_test_teams(dataframes_dict['teams'], features, target)
-    trained_models_teams = {}
-    trained_models_teams['Random Forest Regressor'] = joblib.load('models/RandomForestRegressorTeams.joblib')
+    trained_models_teams = models_train_and_test_teams(dataframes_dict['teams'], features, target)
 
     dataframes_dict['teams'] = models_predict_future_teams(dataframes_dict['teams'], dataframes_dict['players_teams'],
                                                            team_map, features, features_to_be_lagged,
                                                            trained_models_teams['Random Forest Regressor'],
                                                            lag_years_teams)
-
 
     print(dataframes_dict['teams'].sort_values(by='Predicted_Playoff', ascending=False).head(len(team_map)))
 

@@ -35,6 +35,7 @@ class CustomCrossValidator(BaseCrossValidator):
                 y_window = window_data[self.target_column]
 
                 # Append the current window data to the lists
+                x_window.drop('year', axis=1, inplace=True)
                 x_train_list.append(x_window)
                 y_train_list.append(y_window)
 
@@ -43,6 +44,7 @@ class CustomCrossValidator(BaseCrossValidator):
                 x_next_year = next_year_data.drop(columns=[self.target_column])
                 y_next_year = next_year_data[self.target_column]
 
+                x_next_year.drop('year', axis=1, inplace=True)
                 x_test_list.append(x_next_year)
                 y_test_list.append(y_next_year)
         return x_train_list, y_train_list

@@ -3,6 +3,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import LinearRegression, Ridge, Lasso
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.neural_network import MLPRegressor
+from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVR
 from sklearn.metrics import (mean_absolute_error, mean_squared_error, r2_score)
 from math import sqrt
@@ -69,56 +70,68 @@ regression_models = [
     }
 ]
 
-def save_models(trained_models):
+
+def save_models(trained_models, name):
     # Create the "models" folder if it doesn't exist
     if not os.path.exists("models"):
         os.makedirs("models")
 
     for model_name, model in trained_models.items():
         # Remove spaces and create the file name
-        file_name = model_name.replace(" ", "") + ".joblib"
+        file_name = model_name.replace(" ", "") + name + ".joblib"
 
         # Create the full path to save the model
         model_path = os.path.join("models", file_name)
 
         # Save the model to the specified path
-        joblib.dump(model, model_path)
+        # joblib.dump(model, model_path)
 
 
-def run_all(x_train, y_train, x_test, y_test, min_years, max_years, target_column):
+def run_all(x_train, y_train, x_test, y_test, min_years, max_years, target_column, name):
     results = []
     trained_models = {}
 
+    store = False
     # Loop through each regression model
     for model_info in regression_models:
         model = model_info['model']
         params = model_info['params']
         model_name = model_info['name']
 
-        grid_search = GridSearchCV(model, params, cv=CustomCrossValidator(min_years, max_years, target_column), n_jobs=-1)
-        grid_search.fit(x_train, y_train)
-        trained_model = grid_search.best_estimator_
-        best_params = str(grid_search.best_params_)
-        y_pred = grid_search.predict(x_test)
+        try:
+            trained_models[model_name] = joblib.load(
+                os.path.join("models", model_name.replace(" ", "") + name + ".joblib"))
+        except FileNotFoundError:
+            store = True
+            cross_validator_elements = CustomCrossValidator(min_years, max_years, target_column).split(x_train.copy(),
+                                                                                                       y_train.copy())
+            grid_search = GridSearchCV(model, params, cv=cross_validator_elements, n_jobs=-1)
+            x_train.drop('year', axis=1, inplace=True)
+            grid_search.fit(x_train, y_train)
+            trained_model = grid_search.best_estimator_
+            best_params = str(grid_search.best_params_)
+            x_test.drop('year', axis=1, inplace=True)
+            y_pred = grid_search.predict(x_test)
 
-        mae = mean_absolute_error(y_test, y_pred)
-        mse = mean_squared_error(y_test, y_pred)
-        rmse = sqrt(mse)
-        r2 = r2_score(y_test, y_pred)
+            mae = mean_absolute_error(y_test, y_pred)
+            mse = mean_squared_error(y_test, y_pred)
+            rmse = sqrt(mse)
+            r2 = r2_score(y_test, y_pred)
 
-        results.append({
-            'Model': model_name,
-            'Best Parameters': best_params,
-            'Best Score': grid_search.best_score_,
-            'Mean Absolute Error': mae,
-            'Mean Squared Error': mse,
-            'Root Mean Squared Error': rmse,
-            'R-squared': r2
-        })
-        trained_models[model_name] = trained_model
-        print("Finished analyzing " + model_name)
+            results.append({
+                'Model': model_name,
+                'Best Parameters': best_params,
+                'Best Score': grid_search.best_score_,
+                'Mean Absolute Error': mae,
+                'Mean Squared Error': mse,
+                'Root Mean Squared Error': rmse,
+                'R-squared': r2
+            })
+            trained_models[model_name] = trained_model
+            print("Finished analyzing " + model_name)
 
-    results_df = pd.DataFrame(results)
-    results_df.to_csv('results.csv', index=False)
-    save_models(trained_models)
+    if store:
+        results_df = pd.DataFrame(results)
+        results_df.to_csv('results.csv', index=False)
+        save_models(trained_models, name)
     return trained_models
