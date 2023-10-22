@@ -1,4 +1,3 @@
-import joblib
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
@@ -87,19 +86,19 @@ def player_data_cleanup(players):
 
 
 def college_mapping(unique_colleges):
-    college_mapping = {}
+    college_mapping_dict = {}
     for index, college in enumerate(unique_colleges):
-        college_mapping[college] = index
+        college_mapping_dict[college] = index
 
-    return college_mapping
+    return college_mapping_dict
 
 
 def team_mapping(unique_teams):
-    team_mapping = {}
+    team_mapping_dict = {}
     for index, team in enumerate(unique_teams):
-        team_mapping[team] = index
+        team_mapping_dict[team] = index
 
-    return team_mapping
+    return team_mapping_dict
 
 
 def position_mapping(unique_pos):
@@ -124,7 +123,7 @@ def merge_players_awards(players, awards_players):
 
 def feature_creation_players_teams(players_teams):
     print("Feature Creation - Players Teams")
-    # Creating Eficiency column of the players
+    # Creating Efficiency column of the players
     players_teams['EFF'] = (players_teams['points'] + players_teams['rebounds'] + players_teams['assists'] +
                             players_teams['steals'] + players_teams['blocks'] - (
                                     players_teams['fgAttempted'] - players_teams['fgMade']) - (
@@ -155,11 +154,11 @@ def merge_players_teams(players_teams, players):
     return players_teams
 
 
-def series_post_data_cleanup(series_post, team_mapping):
+def series_post_data_cleanup(series_post, team_mapping_dict):
     print("Series Post Data Cleanup")
     series_post.drop(['lgIDLoser', 'lgIDWinner'], inplace=True, axis='columns')
-    series_post['tmIDLoser'] = series_post['tmIDLoser'].replace(team_mapping)
-    series_post['tmIDWinner'] = series_post['tmIDWinner'].replace(team_mapping)
+    series_post['tmIDLoser'] = series_post['tmIDLoser'].replace(team_mapping_dict)
+    series_post['tmIDWinner'] = series_post['tmIDWinner'].replace(team_mapping_dict)
 
     label_encoder = LabelEncoder()
     series_post['series'] = label_encoder.fit_transform(series_post['series'])
@@ -503,13 +502,10 @@ def main():
     print("PLAYERS MODELS DONE")
 
     dataframes_dict['coaches'] = feature_creation_coaches(dataframes_dict['coaches'])
-
     dataframes_dict['coaches'] = coaches_data_cleanup(dataframes_dict['coaches'])
 
     dataframes_dict['teams'] = merge_coaches(dataframes_dict['teams'], dataframes_dict['coaches'])
-
     dataframes_dict['teams'] = feature_creation_teams(dataframes_dict['teams'], dataframes_dict['players_teams'])
-
     dataframes_dict['teams'] = teams_data_cleanup(dataframes_dict['teams'], team_map)
 
     lag_years_teams = 3
