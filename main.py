@@ -6,6 +6,7 @@ import models
 
 FAST = True
 
+
 def progress(row):
     if pd.isnull(row['firstRound']):
         return 0
