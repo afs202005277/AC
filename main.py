@@ -4,6 +4,7 @@ import numpy as np
 from sklearn.preprocessing import LabelEncoder
 import models
 
+FAST = True
 
 def progress(row):
     if pd.isnull(row['firstRound']):
@@ -190,7 +191,7 @@ def models_train_and_test_players(players_teams, features, target):
     y_train = players_train_teams[target]
     x_test = last_year_records[features]
     y_test = last_year_records[target]
-    trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target, "Players")
+    trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target, "Players", FAST)
 
     # Feature Importance - understanding which features are important:
 
@@ -381,7 +382,7 @@ def models_train_and_test_teams(teams, features, target):
     y_train = train_teams[target]
     x_test = this_year_records[features]
     y_test = this_year_records[target]
-    trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target, "Teams")
+    trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target, "Teams", FAST)
 
     # Feature Importance - understanding which features are important:
 
@@ -470,7 +471,7 @@ def main():
     # creating new features to help predict the EFF for the next year:
 
     # Mapping teams to indexes
-    team_map = team_mapping(set(list(dataframes_dict['teams']['tmID'].unique())))
+    team_map = team_mapping(list(dataframes_dict['teams']['tmID'].unique()))
 
     # Clean up data on series_post dataframe - USELESS????
     dataframes_dict['series_post'] = series_post_data_cleanup(dataframes_dict['series_post'], team_map)
