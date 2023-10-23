@@ -5,7 +5,8 @@ from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.neural_network import MLPRegressor
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler, MaxAbsScaler, Normalizer
 from sklearn.svm import SVR
-from sklearn.metrics import (mean_absolute_error, mean_squared_error, r2_score)
+from sklearn.metrics import (mean_absolute_error, mean_squared_error, r2_score, confusion_matrix)
+
 from math import sqrt
 import os
 import joblib
@@ -144,6 +145,7 @@ def run_all(x_train_original, y_train_original, x_test_original, y_test_original
                 mse = mean_squared_error(y_test, y_pred)
                 rmse = sqrt(mse)
                 r2 = r2_score(y_test, y_pred)
+                
 
                 results.append({
                     'Model': model_name,

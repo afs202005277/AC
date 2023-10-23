@@ -157,14 +157,17 @@ def merge_players_teams(players_teams, players):
 
 def series_post_data_cleanup(series_post, team_mapping_dict):
     print("Series Post Data Cleanup")
-    series_post.drop(['lgIDLoser', 'lgIDWinner'], inplace=True, axis='columns')
     series_post['tmIDLoser'] = series_post['tmIDLoser'].replace(team_mapping_dict)
     series_post['tmIDWinner'] = series_post['tmIDWinner'].replace(team_mapping_dict)
 
+    series_post.drop(['lgIDWinner', 'lgIDLoser'], axis=1, inplace=True)
+
     label_encoder = LabelEncoder()
     series_post['series'] = label_encoder.fit_transform(series_post['series'])
-    round_mapping = {'FR': 1, 'CF': 2, 'F': 3}
-    series_post['round'] = series_post['round'].replace(round_mapping)
+
+    total_games = series_post['W'] + series_post['L']
+    series_post['W'] = series_post['W'] / total_games
+    series_post['L'] = series_post['L'] / total_games
 
     return series_post
 
@@ -315,12 +318,6 @@ def feature_creation_coaches(coaches):
     return coaches
 
 
-def coaches_data_cleanup(coaches):
-    coaches = coaches.drop(columns=['won', 'lost', 'post_wins', 'post_losses', 'lgID'])
-
-    return coaches
-
-
 def feature_creation_team_score(teams, players_teams, teams_map=None):
     # Creating Team Score (Predicted and Real)
 
@@ -394,13 +391,6 @@ def merge_coaches(teams, coaches):
 
 def teams_data_cleanup(teams, team_map):
     print("Teams Data Cleanup")
-    teams = teams.drop(columns=['divID', 'firstRound', 'semis', 'finals', 'lgID', 'seeded', 'arena', 'attend',
-                                'min', 'confW', 'confL', 'awayW', 'awayL', 'homeW', 'homeL', 'won', 'lost', 'o_fgm',
-                                'o_fga', 'o_ftm', 'o_fta', 'o_3pm', 'o_3pa', 'o_oreb',
-                                'o_dreb', 'o_reb', 'o_asts', 'o_pf', 'o_stl', 'o_to', 'o_blk', 'o_pts',
-                                'd_fgm', 'd_fga', 'd_ftm', 'd_fta', 'd_3pm', 'd_3pa', 'd_oreb',
-                                'd_dreb', 'd_reb', 'd_asts', 'd_pf', 'd_stl', 'd_to', 'd_blk', 'd_pts', 'tmORB',
-                                'tmDRB', 'tmTRB', 'opptmORB', 'opptmDRB', 'opptmTRB'])
     teams['tmID'] = teams['tmID'].replace(team_map)
 
     playoff_mapping = {'Y': 1, 'N': 0}
@@ -427,6 +417,8 @@ def create_lagged_features_teams(teams, features_to_be_lagged, lag_years):
 
     return teams
 
+
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 def models_train_and_test_teams(teams, features, target):
     print("Models Running - Teams")
@@ -505,6 +497,115 @@ def models_predict_future_teams(teams, players_teams, teams_map, features, featu
     return future_team_data
 
 
+def turn_series_post_into_no_bias(series_post):
+    # Create new columns for team1 and team2
+    series_post['team1'] = np.where(np.random.rand(len(series_post)) < 0.5, series_post['tmIDWinner'],
+                                    series_post['tmIDLoser'])
+    series_post['team2'] = np.where(series_post['team1'] == series_post['tmIDWinner'], series_post['tmIDLoser'],
+                                    series_post['tmIDWinner'])
+
+    # Adjust W and L columns to represent team1wins and team2wins
+    series_post['team1wins'] = np.where(series_post['team1'] == series_post['tmIDWinner'], series_post['W'],
+                                        series_post['L'])
+    series_post['team2wins'] = np.where(series_post['team2'] == series_post['tmIDWinner'], series_post['W'],
+                                        series_post['L'])
+
+    # Drop unnecessary columns if needed
+    series_post.drop(columns=['W', 'L', 'tmIDWinner', 'tmIDLoser'], inplace=True)
+
+    return series_post
+
+def merge_teams(series_post, teams):
+    # Merge for team1 using suffix '_team1'
+    merged_team1 = pd.merge(series_post, teams, left_on=['year', 'team1'], right_on=['year', 'tmID'], how='inner')
+
+    # Merge for team2 using suffix '_team2'
+    merged_team2 = pd.merge(series_post, teams, left_on=['year', 'team2'], right_on=['year', 'tmID'], how='inner')
+
+    series_post = pd.merge(merged_team1, merged_team2, on=['year', 'team1', 'team2'], how='inner', suffixes=('_team1', '_team2'))
+
+    return series_post
+
+def models_train_and_test_games(series_post, features, target):
+    print("Models Running - Games Simulation")
+    this_year_records, train_teams = find_and_move_max_year_records(series_post)
+    x_train = train_teams[features]
+    y_train = train_teams[target]
+    x_test = this_year_records[features]
+    y_test = this_year_records[target]
+    trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target, "GamesSimulator", FAST)
+
+    # Feature Importance - understanding which features are important:
+
+    # Access feature importances
+    feature_importances = trained_models['Random Forest Regressor'].feature_importances_
+
+    # Create a DataFrame to display feature importances
+    features.remove('year')
+    importance_df = pd.DataFrame({'Feature': features, 'Importance': feature_importances})
+
+    # Sort the DataFrame by importance in descending order
+    importance_df = importance_df.sort_values(by='Importance', ascending=False)
+
+    # Print or visualize the feature importances
+    print(importance_df)
+
+    return trained_models
+
+def simulate_games(series_post, teams, model, features):
+    columns = features.copy()
+    for feature in features:
+        features[features.index(feature)] = feature[:-5] + 'x'
+
+    features = list(set(features))
+
+    most_recent_year = teams['year'].max()
+    filtered_teams = teams.loc[teams['year'] == most_recent_year, ['tmID'] + features]
+
+    # Keep unique rows based on 'tmID' column
+    teams_clean = filtered_teams.drop_duplicates(subset='tmID')
+
+    # Create an empty DataFrame with the specified columns
+    prepared_db = pd.DataFrame(columns=['team1', 'team2']+columns)
+
+    # Iterate over each team1 in teams_clean
+    for idx, team1_row in teams_clean.iterrows():
+        team1_id = team1_row['tmID']
+
+        # Iterate over all other teams except team1
+        for _, team2_row in teams_clean[teams_clean['tmID'] != team1_id].iterrows():
+            team2_id = team2_row['tmID']
+
+            # Create a dictionary to store the row data
+            row_data = {}
+
+            row_data['team1'] = team1_id
+            row_data['team2'] = team2_id
+
+            for col in columns:
+                if col[-1] == '1':
+                    row_data[col] = team1_row[col[:-5] + 'x']
+                if col[-1] == '2':
+                    row_data[col] = team2_row[col[:-5] + 'x']
+
+            # Add the row_data to the prepared_db DataFrame
+            prepared_db = prepared_db.append(row_data, ignore_index=True)
+
+    y_pred = model.predict(prepared_db[columns])
+    prepared_db['team1Wins'] = y_pred
+    prepared_db['team2Wins'] = 1 - prepared_db['team1Wins']
+
+    team1_wins_sum = prepared_db.groupby('team1')['team1Wins'].sum().reset_index()
+    team2_wins_sum = prepared_db.groupby('team2')['team2Wins'].sum().reset_index()
+
+    merged_df = pd.merge(team1_wins_sum, team2_wins_sum, how='inner', left_on='team1', right_on='team2')
+    merged_df['teamWins'] = merged_df['team1Wins'] + merged_df['team2Wins']
+
+    total_wins = merged_df[['team1', 'teamWins']]
+    total_wins.columns = ['team', 'teamWins']
+
+    return total_wins
+
 def main():
     # Load data from CSVs
     dataframes_dict = initial_data_load()
@@ -525,9 +626,6 @@ def main():
 
     # Mapping teams to indexes
     team_map = team_mapping(list(dataframes_dict['teams']['tmID'].unique()))
-
-    # Clean up data on series_post dataframe - USELESS????
-    dataframes_dict['series_post'] = series_post_data_cleanup(dataframes_dict['series_post'], team_map)
 
     # USELESS ???
     """
@@ -565,21 +663,38 @@ def main():
     print("PLAYERS MODELS DONE")
 
     dataframes_dict['coaches'] = feature_creation_coaches(dataframes_dict['coaches'])
-    dataframes_dict['coaches'] = coaches_data_cleanup(dataframes_dict['coaches'])
 
     dataframes_dict['teams'] = merge_coaches(dataframes_dict['teams'], dataframes_dict['coaches'])
     dataframes_dict['teams'] = feature_creation_teams(dataframes_dict['teams'], dataframes_dict['players_teams'])
     dataframes_dict['teams'] = teams_data_cleanup(dataframes_dict['teams'], team_map)
 
     lag_years_teams = 3
-    features_to_be_lagged = ['PredictedTeamScore', 'defensive_performance', 'offensive_performance', 'gamesWLRatio',
+    features_to_be_lagged = ['RealTeamScore', 'defensive_performance', 'offensive_performance', 'gamesWLRatio',
                              'homeWLRatio', 'awayWLRatio', 'confWLRatio', 'progress', 'playoff']
     dataframes_dict['teams'] = create_lagged_features_teams(dataframes_dict['teams'],
                                                             features_to_be_lagged, lag_years_teams)
 
+
+    # data preparation for game simulation
+
+    dataframes_dict['series_post'] = series_post_data_cleanup(dataframes_dict['series_post'], team_map)
+
+    dataframes_dict['series_post'] = turn_series_post_into_no_bias(dataframes_dict['series_post'])
+
+    dataframes_dict['series_post'] = merge_teams(dataframes_dict['series_post'], dataframes_dict['teams'])
+
+
+    # Select relevant features including lagged features
+    features_games = [f'{feat}_Lag_{year}_{team}' for feat in features_to_be_lagged for year in
+                range(1, lag_years_teams + 1) for team in ['team1', 'team2']] + ['year'] + ['PredictedTeamScore' + team for team in ['_team1', '_team2']]
+    target = 'team1wins_team1'
+    trained_models_for_games = models_train_and_test_games(dataframes_dict['series_post'], features_games, target)
+
+    print("TEAMS PLAYOFF PREDICT")
+
     # Select relevant features including lagged features
     features = [f'{feat}_Lag_{year}' for feat in features_to_be_lagged for year in
-                range(1, lag_years_players + 1)] + ['year', 'PredictedTeamScore']
+                range(1, lag_years_teams + 1)] + ['year', 'PredictedTeamScore']
     target = 'playoff'
     trained_models_teams = models_train_and_test_teams(dataframes_dict['teams'], features, target)
 
@@ -589,6 +704,15 @@ def main():
                                                            lag_years_teams)
 
     print(dataframes_dict['teams'].sort_values(by='Predicted_Playoff', ascending=False).head(len(team_map)))
+
+    print("PREDICT NUMBER OF GAMES WON BY EACH TEAM")
+
+    games_to_be_won = simulate_games(dataframes_dict['series_post'],
+                                       dataframes_dict['teams'],
+                                       trained_models_for_games['Random Forest Regressor'],
+                                       features_games)
+
+    print(games_to_be_won.sort_values(by='teamWins', ascending=False).head(len(team_map)))
 
 
 main()
