@@ -157,6 +157,7 @@ def merge_players_teams(players_teams, players):
 
 def series_post_data_cleanup(series_post, team_mapping_dict):
     print("Series Post Data Cleanup")
+    series_post.drop(['lgIDLoser', 'lgIDWinner'], inplace=True, axis='columns')
     series_post['tmIDLoser'] = series_post['tmIDLoser'].replace(team_mapping_dict)
     series_post['tmIDWinner'] = series_post['tmIDWinner'].replace(team_mapping_dict)
 
@@ -318,6 +319,12 @@ def feature_creation_coaches(coaches):
     return coaches
 
 
+def coaches_data_cleanup(coaches):
+    coaches = coaches.sort_values(by='stint', ascending=False)
+    coaches = coaches.groupby(['year', 'tmID']).first().reset_index()
+    return coaches
+
+
 def feature_creation_team_score(teams, players_teams, teams_map=None):
     # Creating Team Score (Predicted and Real)
 
@@ -413,12 +420,10 @@ def create_lagged_features_teams(teams, features_to_be_lagged, lag_years):
 
     # ISTO ESTÁ UM BOCADO CHAPADO AQUI... TEM DE SE MUDAR (OU NAO)
     teams[[i for i in lagged_features if "playoff" in i]] = teams[
-        [i for i in lagged_features if "playoff" in i]].fillna(0.5)
+        [i for i in lagged_features if "playoff" in i]].replace(-1, 0.5)
 
     return teams
 
-
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 def models_train_and_test_teams(teams, features, target):
     print("Models Running - Teams")
@@ -663,6 +668,7 @@ def main():
     print("PLAYERS MODELS DONE")
 
     dataframes_dict['coaches'] = feature_creation_coaches(dataframes_dict['coaches'])
+    dataframes_dict['coaches'] = coaches_data_cleanup(dataframes_dict['coaches'])
 
     dataframes_dict['teams'] = merge_coaches(dataframes_dict['teams'], dataframes_dict['coaches'])
     dataframes_dict['teams'] = feature_creation_teams(dataframes_dict['teams'], dataframes_dict['players_teams'])
@@ -673,7 +679,6 @@ def main():
                              'homeWLRatio', 'awayWLRatio', 'confWLRatio', 'progress', 'playoff']
     dataframes_dict['teams'] = create_lagged_features_teams(dataframes_dict['teams'],
                                                             features_to_be_lagged, lag_years_teams)
-
 
     # data preparation for game simulation
 
@@ -703,7 +708,8 @@ def main():
                                                            trained_models_teams['Random Forest Regressor'],
                                                            lag_years_teams)
 
-    print(dataframes_dict['teams'].sort_values(by='Predicted_Playoff', ascending=False).head(len(team_map)))
+    dataframes_dict['teams'] = dataframes_dict['teams'].sort_values(by='Predicted_Playoff', ascending=False)
+    print(dataframes_dict['teams'].head(len(team_map)))
 
     print("PREDICT NUMBER OF GAMES WON BY EACH TEAM")
 

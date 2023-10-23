@@ -5,8 +5,8 @@ from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.neural_network import MLPRegressor
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler, MaxAbsScaler, Normalizer
 from sklearn.svm import SVR
-from sklearn.metrics import (mean_absolute_error, mean_squared_error, r2_score, confusion_matrix)
-
+from sklearn.metrics import (mean_absolute_error, mean_squared_error, r2_score, accuracy_score, precision_score,
+                             recall_score, f1_score, confusion_matrix)
 from math import sqrt
 import os
 import joblib
@@ -75,20 +75,20 @@ scalers = {'None': None, 'StandardScaler': StandardScaler(), 'MinMaxScaler': Min
            'RobustScaler': RobustScaler(), 'MaxAbsScaler': MaxAbsScaler(), 'Normalizer': Normalizer()}
 
 
-def build_file_name(model_name, name, scaler_name):
-    file_name = model_name.replace(" ", "") + '_' + name + '_' + scaler_name + ".joblib"
+def build_file_name(model_name, name, target_col, scaler_name):
+    file_name = model_name.replace(" ", "") + '_' + name + '_' + target_col + '_' + scaler_name + ".joblib"
     return os.path.join("models", file_name)
 
 
-def save_models(trained_models, name):
+def save_models(trained_models, name, target_col):
     if not os.path.exists("models"):
         os.makedirs("models")
 
     for (model_name, scaler_name), model in trained_models.items():
         # Remove spaces and create the file name
-        model_path = build_file_name(model_name, name, scaler_name)
+        model_path = build_file_name(model_name, name, scaler_name, target_col)
         # Save the model to the specified path
-        # joblib.dump(model, model_path)
+        joblib.dump(model, model_path)
 
 
 def scale_dataframe(scaler, x_train, x_test):
@@ -126,7 +126,7 @@ def run_all(x_train_original, y_train_original, x_test_original, y_test_original
             model_name = model_info['name']
 
             try:
-                trained_models[(model_name, scaler_name)] = joblib.load(build_file_name(model_name, name, scaler_name))
+                trained_models[(model_name, scaler_name)] = joblib.load(build_file_name(model_name, name, scaler_name, target_column))
             except FileNotFoundError:
                 store = True
                 cross_validator_elements = CustomCrossValidator(min_years, max_years, target_column).split(
@@ -145,24 +145,61 @@ def run_all(x_train_original, y_train_original, x_test_original, y_test_original
                 mse = mean_squared_error(y_test, y_pred)
                 rmse = sqrt(mse)
                 r2 = r2_score(y_test, y_pred)
-                
 
-                results.append({
-                    'Model': model_name,
-                    'Scaler': scaler_name,
-                    'Best Parameters': best_params,
-                    'Best Score': grid_search.best_score_,
-                    'Mean Absolute Error': mae,
-                    'Mean Squared Error': mse,
-                    'Root Mean Squared Error': rmse,
-                    'R-squared': r2
-                })
+                if target_column == 'playoff':
+                    y_test[y_test == 1] = 'Y'
+                    y_test[y_test == 0] = 'N'
+
+                    data = {'y_test': y_test, 'y_pred': y_pred}
+                    data = pd.DataFrame(data)
+                    data = data.sort_values(by='y_pred', ascending=False)
+                    data = data.reset_index(drop=True)
+                    data['y_pred'] = data['y_pred'].astype(str)
+                    data.loc[:8, 'y_pred'] = 'Y'
+                    data.loc[8:, 'y_pred'] = 'N'
+
+                    y_test = data['y_test']
+                    y_pred = data['y_pred']
+
+                    print(str(data))
+
+                    accuracy = accuracy_score(y_test, y_pred)
+                    precision = precision_score(y_test, y_pred, pos_label='Y')
+                    recall = recall_score(y_test, y_pred, pos_label='Y')
+                    f1 = f1_score(y_test, y_pred, pos_label='Y')
+                    conf_matrix = confusion_matrix(y_test, y_pred)
+                    print(conf_matrix)
+                    results.append({
+                        'Model': model_name,
+                        'Scaler': scaler_name,
+                        'Best Parameters': best_params,
+                        'Best Score': grid_search.best_score_,
+                        'Mean Absolute Error': mae,
+                        'Mean Squared Error': mse,
+                        'Root Mean Squared Error': rmse,
+                        'R-squared': r2,
+                        'Accuracy': accuracy,
+                        'Recall': recall,
+                        'Precision': precision,
+                        'F1 Score': f1
+                    })
+                else:
+                    results.append({
+                        'Model': model_name,
+                        'Scaler': scaler_name,
+                        'Best Parameters': best_params,
+                        'Best Score': grid_search.best_score_,
+                        'Mean Absolute Error': mae,
+                        'Mean Squared Error': mse,
+                        'Root Mean Squared Error': rmse,
+                        'R-squared': r2
+                    })
                 trained_models[(model_name, scaler_name)] = trained_model
                 print("Finished analyzing " + model_name + " with " + scaler_name)
 
     if store:
         results_df = pd.DataFrame(results)
         results_df.to_csv('results' + name + '.csv', index=False)
-        save_models(trained_models, name)
+        save_models(trained_models, name, target_column)
 
     return dict([(x[0], y) for x, y in trained_models.items()])
