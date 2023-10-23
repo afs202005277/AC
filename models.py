@@ -75,20 +75,20 @@ scalers = {'None': None, 'StandardScaler': StandardScaler(), 'MinMaxScaler': Min
            'RobustScaler': RobustScaler(), 'MaxAbsScaler': MaxAbsScaler(), 'Normalizer': Normalizer()}
 
 
-def build_file_name(model_name, name, scaler_name):
-    file_name = model_name.replace(" ", "") + '_' + name + '_' + scaler_name + ".joblib"
+def build_file_name(model_name, name, target_col, scaler_name):
+    file_name = model_name.replace(" ", "") + '_' + name + '_' + target_col + '_' + scaler_name + ".joblib"
     return os.path.join("models", file_name)
 
 
-def save_models(trained_models, name):
+def save_models(trained_models, name, target_col):
     if not os.path.exists("models"):
         os.makedirs("models")
 
     for (model_name, scaler_name), model in trained_models.items():
         # Remove spaces and create the file name
-        model_path = build_file_name(model_name, name, scaler_name)
+        model_path = build_file_name(model_name, name, scaler_name, target_col)
         # Save the model to the specified path
-        # joblib.dump(model, model_path)
+        joblib.dump(model, model_path)
 
 
 def scale_dataframe(scaler, x_train, x_test):
@@ -126,7 +126,7 @@ def run_all(x_train_original, y_train_original, x_test_original, y_test_original
             model_name = model_info['name']
 
             try:
-                trained_models[(model_name, scaler_name)] = joblib.load(build_file_name(model_name, name, scaler_name))
+                trained_models[(model_name, scaler_name)] = joblib.load(build_file_name(model_name, name, scaler_name, target_column))
             except FileNotFoundError:
                 store = True
                 cross_validator_elements = CustomCrossValidator(min_years, max_years, target_column).split(
@@ -200,6 +200,6 @@ def run_all(x_train_original, y_train_original, x_test_original, y_test_original
     if store:
         results_df = pd.DataFrame(results)
         results_df.to_csv('results' + name + '.csv', index=False)
-        save_models(trained_models, name)
+        save_models(trained_models, name, target_column)
 
     return dict([(x[0], y) for x, y in trained_models.items()])
