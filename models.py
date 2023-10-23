@@ -107,6 +107,7 @@ def run_all(x_train_original, y_train_original, x_test_original, y_test_original
     global scalers
     results = []
     trained_models = {}
+    group_by = 'tmID' if name == 'Teams' else 'playerID'
 
     store = False
     if fast:
@@ -129,12 +130,12 @@ def run_all(x_train_original, y_train_original, x_test_original, y_test_original
                 trained_models[(model_name, scaler_name)] = joblib.load(build_file_name(model_name, name, scaler_name, target_column))
             except FileNotFoundError:
                 store = True
-                cross_validator_elements = CustomCrossValidator(min_years, max_years, target_column).split(
+                cross_validator_elements = CustomCrossValidator(min_years, max_years, target_column, group_by).split(
                     x_train.copy(),
                     y_train.copy())
                 grid_search = GridSearchCV(model, params, cv=cross_validator_elements, n_jobs=-1)
-                x_train.drop('year', axis=1, inplace=True)
-                x_test.drop('year', axis=1, inplace=True)
+                x_train.drop(['year', group_by], axis=1, inplace=True)
+                x_test.drop(['year', group_by], axis=1, inplace=True)
                 x_train, x_test = scale_dataframe(scaler, x_train, x_test)
                 grid_search.fit(x_train, y_train)
                 trained_model = grid_search.best_estimator_
