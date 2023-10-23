@@ -142,14 +142,40 @@ def teams_analysis(dataframes_dict):
     #Displays variation of classification of teams during the years
     print(dataframes_dict['teams'].columns)
     
-    #sns.set(style="darkgrid")
-    #plt.figure(figsize=(12, 6))
-    #sns.lineplot(data=dataframes_dict['teams'], x='year', y='rank', hue='tmID', marker="o", markersize=8, dashes=False)
-    #plt.xlabel('Year')
-    #plt.ylabel('Rank')
-    #plt.title('Rank per Year')
-    #plt.legend(title='Teams', loc='upper left', bbox_to_anchor=(1, 1))
-    #plt.show()
+    #Displays number of presences in playoffs of each team
+    playoffs = dataframes_dict['teams'][dataframes_dict['teams']['playoff'] == 'Y']
+    times_in_playoff = playoffs['tmID'].value_counts().reset_index()
+    times_in_playoff.columns = ['Team', 'Playoff Appearances']
+    print(times_in_playoff)
+    
+def teams_post_analysis(dataframes_dict):
+    # Calculate WLRatio
+    dataframes_dict['teams_post']['WLRatio'] = dataframes_dict['teams_post']['W'] / (dataframes_dict['teams_post']['W'] + dataframes_dict['teams_post']['L'])
+
+    # Group by 'tmID' and 'year' and calculate the mean WLRatio for each team for each year
+    team_year_wl_ratio = dataframes_dict['teams_post'].groupby(['tmID', 'year'])['WLRatio'].mean().reset_index()
+
+    #Try to make a plot with the rank of each team per year (lineplot)
+    
+    # Rename columns for clarity
+    team_year_wl_ratio.columns = ['Team', 'Year', 'WLRatio']
+
+    team_year_wl_ratio = team_year_wl_ratio[team_year_wl_ratio['WLRatio'] != 0]
+
+    # Display the table
+    print(team_year_wl_ratio)
+    
+def series_post_analysis(dataframes_dict):
+    playoff_finals = dataframes_dict['series_post'][dataframes_dict['series_post']['round'] == 'F']
+    
+    # Count the number of playoff wins for each team
+    playoff_wins = playoff_finals['tmIDWinner'].value_counts().reset_index()
+    playoff_wins.columns = ['TeamID', 'PlayoffWins']
+    
+    print(playoff_wins)
+
+
+           
         
 def main():
     dataframes_dict = load_data()
@@ -158,6 +184,8 @@ def main():
     players_teams_analysis(dataframes_dict)
     players_analysis(dataframes_dict)
     teams_analysis(dataframes_dict)
+    teams_post_analysis(dataframes_dict)
+    series_post_analysis(dataframes_dict)
     
 main()    
     
