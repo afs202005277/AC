@@ -317,7 +317,8 @@ def feature_creation_coaches(coaches):
 
 def coaches_data_cleanup(coaches):
     coaches = coaches.drop(columns=['won', 'lost', 'post_wins', 'post_losses', 'lgID'])
-
+    coaches = coaches.sort_values(by='stint', ascending=False)
+    coaches = coaches.groupby(['year', 'tmID']).first().reset_index()
     return coaches
 
 
@@ -423,7 +424,7 @@ def create_lagged_features_teams(teams, features_to_be_lagged, lag_years):
 
     # ISTO ESTÁ UM BOCADO CHAPADO AQUI... TEM DE SE MUDAR (OU NAO)
     teams[[i for i in lagged_features if "playoff" in i]] = teams[
-        [i for i in lagged_features if "playoff" in i]].fillna(0.5)
+        [i for i in lagged_features if "playoff" in i]].replace(-1, 0.5)
 
     return teams
 

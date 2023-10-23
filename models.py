@@ -88,7 +88,7 @@ def save_models(trained_models, name):
         # Remove spaces and create the file name
         model_path = build_file_name(model_name, name, scaler_name)
         # Save the model to the specified path
-        joblib.dump(model, model_path)
+        # joblib.dump(model, model_path)
 
 
 def scale_dataframe(scaler, x_train, x_test):
@@ -137,7 +137,6 @@ def run_all(x_train_original, y_train_original, x_test_original, y_test_original
                 x_test.drop('year', axis=1, inplace=True)
                 x_train, x_test = scale_dataframe(scaler, x_train, x_test)
                 grid_search.fit(x_train, y_train)
-                print("Finished fitting")
                 trained_model = grid_search.best_estimator_
                 best_params = str(grid_search.best_params_)
                 y_pred = grid_search.predict(x_test)
@@ -154,17 +153,22 @@ def run_all(x_train_original, y_train_original, x_test_original, y_test_original
                     data = {'y_test': y_test, 'y_pred': y_pred}
                     data = pd.DataFrame(data)
                     data = data.sort_values(by='y_pred', ascending=False)
-                    data.loc[:7, 'y_pred'] = 'Y'
+                    data = data.reset_index(drop=True)
+                    data['y_pred'] = data['y_pred'].astype(str)
+                    data.loc[:8, 'y_pred'] = 'Y'
                     data.loc[8:, 'y_pred'] = 'N'
 
                     y_test = data['y_test']
                     y_pred = data['y_pred']
+
+                    print(str(data))
 
                     accuracy = accuracy_score(y_test, y_pred)
                     precision = precision_score(y_test, y_pred, pos_label='Y')
                     recall = recall_score(y_test, y_pred, pos_label='Y')
                     f1 = f1_score(y_test, y_pred, pos_label='Y')
                     conf_matrix = confusion_matrix(y_test, y_pred)
+                    print(conf_matrix)
                     results.append({
                         'Model': model_name,
                         'Scaler': scaler_name,
