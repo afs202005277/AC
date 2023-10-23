@@ -588,7 +588,8 @@ def main():
                                                            trained_models_teams['Random Forest Regressor'],
                                                            lag_years_teams)
 
-    print(dataframes_dict['teams'].sort_values(by='Predicted_Playoff', ascending=False).head(len(team_map)))
+    dataframes_dict['teams'] = dataframes_dict['teams'].sort_values(by='Predicted_Playoff', ascending=False)
+    print(dataframes_dict['teams'].head(len(team_map)))
 
 
 main()
