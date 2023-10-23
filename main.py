@@ -20,6 +20,7 @@ def progress(row):
 
 
 def find_and_move_max_year_records(players_teams):
+    players_teams = players_teams.copy()
     max_year = players_teams['year'].max()
     max_year_records = players_teams[players_teams['year'] == max_year]
     max_year_df = pd.DataFrame(max_year_records)
@@ -183,6 +184,36 @@ def create_lagged_features_players(players_teams, features_to_be_lagged, lag_yea
     return players_teams
 
 
+def models_train_and_test_players_dpr(players_teams, features, target):
+    print("Models Running - Players")
+    players_teams = players_teams.copy()
+    players_teams = players_teams.dropna()
+    last_year_records, players_train_teams = find_and_move_max_year_records(players_teams)
+
+    x_train = players_train_teams[features]
+    y_train = players_train_teams[target]
+    x_test = last_year_records[features]
+    y_test = last_year_records[target]
+    trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target, "Players", FAST)
+
+    # Feature Importance - understanding which features are important:
+
+    # Access feature importance's
+    feature_importances = trained_models['Random Forest Regressor'].feature_importances_
+
+    features.remove('year')
+    # Create a DataFrame to display feature importance's
+    importance_df = pd.DataFrame({'Feature': features, 'Importance': feature_importances})
+
+    # Sort the DataFrame by importance in descending order
+    importance_df = importance_df.sort_values(by='Importance', ascending=False)
+
+    # Print or visualize the feature importances
+    print(importance_df)
+
+    return trained_models
+
+
 def models_train_and_test_players(players_teams, features, target):
     print("Models Running - Players")
     last_year_records, players_train_teams = find_and_move_max_year_records(players_teams)
@@ -211,7 +242,27 @@ def models_train_and_test_players(players_teams, features, target):
     return trained_models
 
 
-def models_predict_future_players(players_teams, features, features_to_be_lagged, model, lag_years):
+def models_predict_future_players_dpr(players_teams, features, features_to_be_lagged, model, lag_years, predict_column):
+    print("Models Predicting - Players")
+    # Creating dataframe with the next years predicted EFF for each player
+
+    # Find the most recent year for each player
+    most_recent_years = players_teams.groupby('playerID')['year'].max().reset_index()
+
+    # Concatenate the original DataFrame and the new rows DataFrame
+    future_player_data = players_teams.copy()
+
+    future_player_data = create_lagged_features_players(future_player_data, features_to_be_lagged, lag_years)
+
+    # Use the trained model to predict DPR for the next year
+    future_predictions = model.predict(future_player_data[features])
+
+    future_player_data[predict_column] = future_predictions
+
+    return future_player_data
+
+
+def models_predict_future_players(players_teams, features, features_to_be_lagged, model, lag_years, predict_column):
     print("Models Predicting - Players")
     # Creating dataframe with the next years predicted EFF for each player
 
@@ -247,10 +298,12 @@ def models_predict_future_players(players_teams, features, features_to_be_lagged
 
     future_player_data = create_lagged_features_players(future_player_data, features_to_be_lagged, lag_years)
 
+    # PROBLEMA:pq é q ha tantos nan?
+    debug_var = future_player_data[future_player_data.isna().any(axis=1)]
     # Use the trained model to predict EFF for the next year
     future_predictions = model.predict(future_player_data[features])
 
-    future_player_data['Predicted_EFF'] = future_predictions
+    future_player_data[predict_column] = future_predictions
 
     return future_player_data
 
@@ -484,7 +537,7 @@ def main():
     """
 
     lag_years_players = 3
-    features_to_be_lagged = ['FG_Percentage', 'FT_Percentage', 'PPG', 'EFF']
+    features_to_be_lagged = ['FG_Percentage', 'FT_Percentage', 'PPG', 'EFF', 'DPR']
     dataframes_dict['players_teams'] = create_lagged_features_players(dataframes_dict['players_teams'],
                                                                       features_to_be_lagged, lag_years_players)
 
@@ -493,12 +546,22 @@ def main():
                 range(1, lag_years_players + 1)] + ['year']
     target = 'EFF'
     trained_models_players = models_train_and_test_players(dataframes_dict['players_teams'], features, target)
-
+    eff_model = trained_models_players['Random Forest Regressor']
     dataframes_dict['players_teams'] = models_predict_future_players(dataframes_dict['players_teams'], features,
                                                                      features_to_be_lagged,
-                                                                     trained_models_players['Random Forest Regressor'],
-                                                                     lag_years_players)
+                                                                     eff_model,
+                                                                     lag_years_players, 'Predicted_EFF')
+    features.append('Predicted_EFF')
+    features.append('year')
+    target = 'DPR'
 
+    trained_models_players = models_train_and_test_players_dpr(dataframes_dict['players_teams'], features, target)
+    dpr_model = trained_models_players['Random Forest Regressor']
+
+    dataframes_dict['players_teams'] = models_predict_future_players_dpr(dataframes_dict['players_teams'], features,
+                                                                         features_to_be_lagged,
+                                                                         dpr_model,
+                                                                         lag_years_players, 'Predicted_DPR')
     print("PLAYERS MODELS DONE")
 
     dataframes_dict['coaches'] = feature_creation_coaches(dataframes_dict['coaches'])

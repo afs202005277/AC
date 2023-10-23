@@ -87,7 +87,7 @@ def save_models(trained_models, name):
         # Remove spaces and create the file name
         model_path = build_file_name(model_name, name, scaler_name)
         # Save the model to the specified path
-        joblib.dump(model, model_path)
+        # joblib.dump(model, model_path)
 
 
 def scale_dataframe(scaler, x_train, x_test):
