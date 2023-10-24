@@ -285,8 +285,6 @@ def models_predict_future_players(players_teams, features, features_to_be_lagged
 
     future_player_data = create_lagged_features(future_player_data, features_to_be_lagged, lag_years, 'playerID')
 
-    # PROBLEMA:pq é q ha tantos nan?
-    debug_var = future_player_data[future_player_data.isna().any(axis=1)]
     # Use the trained model to predict EFF for the next year
     future_predictions = model.predict(future_player_data[features])
 
@@ -539,8 +537,7 @@ def main():
     lag_years_teams = 3
     features_to_be_lagged = ['PredictedTeamScore', 'defensive_performance', 'offensive_performance', 'gamesWLRatio',
                              'homeWLRatio', 'awayWLRatio', 'confWLRatio', 'progress', 'playoff']
-    dataframes_dict['teams'] = create_lagged_features(dataframes_dict['teams'],
-                                                      features_to_be_lagged, lag_years_teams, 'tmID')
+    # dataframes_dict['teams'] = create_lagged_features(dataframes_dict['teams'], features_to_be_lagged, lag_years_teams, 'tmID')
 
     # Select relevant features including lagged features
     features = features_to_be_lagged + ['year', 'PredictedTeamScore', 'tmID']
