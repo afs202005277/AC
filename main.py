@@ -158,13 +158,12 @@ def merge_players_teams(players_teams, players):
 def series_post_data_cleanup(series_post, team_mapping_dict):
     print("Series Post Data Cleanup")
     series_post.drop(['lgIDLoser', 'lgIDWinner'], inplace=True, axis='columns')
-    series_post['tmIDLoser'] = series_post['tmIDLoser'].replace(team_mapping_dict)
-    series_post['tmIDWinner'] = series_post['tmIDWinner'].replace(team_mapping_dict)
-
-    series_post.drop(['lgIDWinner', 'lgIDLoser'], axis=1, inplace=True)
 
     label_encoder = LabelEncoder()
     series_post['series'] = label_encoder.fit_transform(series_post['series'])
+
+    series_post['tmIDWinner'] = series_post['tmIDWinner'].replace(team_mapping_dict)
+    series_post['tmIDLoser'] = series_post['tmIDLoser'].replace(team_mapping_dict)
 
     total_games = series_post['W'] + series_post['L']
     series_post['W'] = series_post['W'] / total_games
@@ -557,59 +556,71 @@ def models_train_and_test_games(series_post, features, target):
 
     return trained_models
 
-def simulate_games(series_post, teams, model, features):
+def simulate_games(teams, model, features):
     columns = features.copy()
     for feature in features:
         features[features.index(feature)] = feature[:-5] + 'x'
 
     features = list(set(features))
 
-    most_recent_year = teams['year'].max()
-    filtered_teams = teams.loc[teams['year'] == most_recent_year, ['tmID'] + features]
+    res_df = pd.DataFrame(columns=['year', 'team', 'teamWins'])
 
-    # Keep unique rows based on 'tmID' column
-    teams_clean = filtered_teams.drop_duplicates(subset='tmID')
+    for most_recent_year in range(1, teams['year'].max()+1):
 
-    # Create an empty DataFrame with the specified columns
-    prepared_db = pd.DataFrame(columns=['team1', 'team2']+columns)
+        filtered_teams = teams.loc[teams['year'] == most_recent_year, ['tmID'] + features]
 
-    # Iterate over each team1 in teams_clean
-    for idx, team1_row in teams_clean.iterrows():
-        team1_id = team1_row['tmID']
+        # Keep unique rows based on 'tmID' column
+        teams_clean = filtered_teams.drop_duplicates(subset='tmID')
 
-        # Iterate over all other teams except team1
-        for _, team2_row in teams_clean[teams_clean['tmID'] != team1_id].iterrows():
-            team2_id = team2_row['tmID']
+        # Create an empty list to store individual DataFrames
+        prepared_data = []
 
-            # Create a dictionary to store the row data
-            row_data = {}
+        # Iterate over each team1 in teams_clean
+        for idx, team1_row in teams_clean.iterrows():
+            team1_id = team1_row['tmID']
 
-            row_data['team1'] = team1_id
-            row_data['team2'] = team2_id
+            # Iterate over all other teams except team1
+            for _, team2_row in teams_clean[teams_clean['tmID'] != team1_id].iterrows():
+                team2_id = team2_row['tmID']
 
-            for col in columns:
-                if col[-1] == '1':
-                    row_data[col] = team1_row[col[:-5] + 'x']
-                if col[-1] == '2':
-                    row_data[col] = team2_row[col[:-5] + 'x']
+                # Create a dictionary to store the row data
+                row_data = {}
 
-            # Add the row_data to the prepared_db DataFrame
-            prepared_db = prepared_db.append(row_data, ignore_index=True)
+                row_data['team1'] = team1_id
+                row_data['team2'] = team2_id
 
-    y_pred = model.predict(prepared_db[columns])
-    prepared_db['team1Wins'] = y_pred
-    prepared_db['team2Wins'] = 1 - prepared_db['team1Wins']
+                for col in columns:
+                    if col[-1] == '1':
+                        row_data[col] = team1_row[col[:-5] + 'x']
+                    if col[-1] == '2':
+                        row_data[col] = team2_row[col[:-5] + 'x']
 
-    team1_wins_sum = prepared_db.groupby('team1')['team1Wins'].sum().reset_index()
-    team2_wins_sum = prepared_db.groupby('team2')['team2Wins'].sum().reset_index()
+                # Convert the row data to a DataFrame and append it to the list
+                prepared_data.append(pd.DataFrame([row_data]))
 
-    merged_df = pd.merge(team1_wins_sum, team2_wins_sum, how='inner', left_on='team1', right_on='team2')
-    merged_df['teamWins'] = merged_df['team1Wins'] + merged_df['team2Wins']
+        # Concatenate all individual DataFrames into a single DataFrame
+        prepared_db = pd.concat(prepared_data, ignore_index=True)
+        prepared_db.dropna(inplace=True)
 
-    total_wins = merged_df[['team1', 'teamWins']]
-    total_wins.columns = ['team', 'teamWins']
 
-    return total_wins
+        y_pred = model.predict(prepared_db[columns])
+        prepared_db['team1Wins'] = y_pred
+        prepared_db['team2Wins'] = 1 - prepared_db['team1Wins']
+
+        team1_wins_sum = prepared_db.groupby('team1')['team1Wins'].sum().reset_index()
+        team2_wins_sum = prepared_db.groupby('team2')['team2Wins'].sum().reset_index()
+
+        merged_df = pd.merge(team1_wins_sum, team2_wins_sum, how='inner', left_on='team1', right_on='team2')
+        merged_df['teamWins'] = merged_df['team1Wins'] + merged_df['team2Wins']
+
+        total_wins = merged_df[['team1', 'teamWins']]
+        total_wins.columns = ['team', 'teamWins']
+        total_wins = total_wins.copy()
+        total_wins.loc[:, 'year'] = most_recent_year
+
+        res_df = pd.concat([res_df, total_wins])
+
+    return res_df
 
 def main():
     # Load data from CSVs
@@ -713,12 +724,11 @@ def main():
 
     print("PREDICT NUMBER OF GAMES WON BY EACH TEAM")
 
-    games_to_be_won = simulate_games(dataframes_dict['series_post'],
-                                       dataframes_dict['teams'],
+    games_to_be_won = simulate_games(dataframes_dict['teams'],
                                        trained_models_for_games['Random Forest Regressor'],
                                        features_games)
 
-    print(games_to_be_won.sort_values(by='teamWins', ascending=False).head(len(team_map)))
+    print(games_to_be_won.sort_values(by=['year', 'teamWins'], ascending=False).head(len(team_map)))
 
 
 main()

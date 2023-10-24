@@ -1,2 +1,2 @@
-Model,Scaler,Best Parameters,Best Score,Mean Absolute Error,Mean Squared Error,Root Mean Squared Error,R-squared
-Random Forest Regressor,None,"{'max_depth': 10, 'min_samples_leaf': 1, 'min_samples_split': 2, 'n_estimators': 50}",0.7672387129009857,0.4912500000000001,0.300675,0.5483383991660624,-0.22179047619047632
+Model,Scaler,Best Parameters,Best Score,Mean Absolute Error,Mean Squared Error,Root Mean Squared Error,R-squared,Accuracy,Recall,Precision,F1 Score
+Random Forest Regressor,None,"{'max_depth': 10, 'min_samples_leaf': 1, 'min_samples_split': 2, 'n_estimators': 50}",0.7543504029511767,0.44000000000000006,0.2593846153846153,0.509298159612437,-0.09589999999999965,0.5384615384615384,0.625,0.625,0.625
