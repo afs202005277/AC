@@ -12,7 +12,7 @@
 - Fazer algoritmo que analisa cada ano tendo em conta os players, as equipas e o coach
 - Calcula score 0-1 que determina equipa vencedora
 - Listar scores
-- Top x vai para playoffs
+- Top 8 vai para playoffs
 
 
 TEAMS:

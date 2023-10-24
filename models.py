@@ -62,12 +62,9 @@ slow_regression_models = [
 
 fast_regression_models = [
     {
-        'name': 'Random Forest Regressor',
-        'model': RandomForestRegressor(),
-        'params': {'n_estimators': [50],
-                   'max_depth': [10],
-                   'min_samples_split': [2],
-                   'min_samples_leaf': [1]}
+        'name': 'Lasso Regression',
+        'model': Lasso(),
+        'params': {'alpha': [0.1, 1, 10]}
     }
 ]
 
