@@ -538,7 +538,7 @@ def models_train_and_test_games(series_post, features, target):
     y_train = train_teams[target]
     x_test = this_year_records[features]
     y_test = this_year_records[target]
-    trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target, "GamesSimulator", FAST)
+    trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target, "GamesSimulator", False)
 
     features.remove('year')
     """# Feature Importance - understanding which features are important:
@@ -622,6 +622,19 @@ def simulate_games(teams, model, features):
         res_df = pd.concat([res_df, total_wins])
 
     return res_df
+
+def data_profiling():
+    from ydata_profiling import ProfileReport
+    import os
+
+    dataframes_dict = initial_data_load()
+
+    if not os.path.exists("data_reports"):
+        os.makedirs("data_reports")
+
+    for name, df in dataframes_dict.items():
+        profile = ProfileReport(df, title="Profiling Report")
+        profile.to_file(os.path.join("data_reports", f"{name}.html"))
 
 def main():
     # Load data from CSVs
