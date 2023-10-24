@@ -199,12 +199,13 @@ def models_train_and_test_players_dpr(players_teams, features, target):
     y_test = last_year_records[target]
     trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target, "Players", FAST)
 
-    # Feature Importance - understanding which features are important:
+    features.remove('year')
+
+    """# Feature Importance - understanding which features are important:
 
     # Access feature importance's
-    feature_importances = trained_models['Random Forest Regressor'].feature_importances_
+    feature_importances = trained_models['Lasso Regression'].feature_importances_
 
-    features.remove('year')
     # Create a DataFrame to display feature importance's
     importance_df = pd.DataFrame({'Feature': features, 'Importance': feature_importances})
 
@@ -212,7 +213,7 @@ def models_train_and_test_players_dpr(players_teams, features, target):
     importance_df = importance_df.sort_values(by='Importance', ascending=False)
 
     # Print or visualize the feature importances
-    print(importance_df)
+    print(importance_df)"""
 
     return trained_models
 
@@ -227,12 +228,12 @@ def models_train_and_test_players(players_teams, features, target):
     y_test = last_year_records[target]
     trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target, "Players", FAST)
 
-    # Feature Importance - understanding which features are important:
+    features.remove('year')
+    """# Feature Importance - understanding which features are important:
 
     # Access feature importance's
-    feature_importances = trained_models['Random Forest Regressor'].feature_importances_
+    feature_importances = trained_models['Lasso Regression'].feature_importances_
 
-    features.remove('year')
     # Create a DataFrame to display feature importance's
     importance_df = pd.DataFrame({'Feature': features, 'Importance': feature_importances})
 
@@ -240,7 +241,7 @@ def models_train_and_test_players(players_teams, features, target):
     importance_df = importance_df.sort_values(by='Importance', ascending=False)
 
     # Print or visualize the feature importances
-    print(importance_df)
+    print(importance_df)"""
 
     return trained_models
 
@@ -433,20 +434,20 @@ def models_train_and_test_teams(teams, features, target):
     y_test = this_year_records[target]
     trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target, "Teams", FAST)
 
-    # Feature Importance - understanding which features are important:
+    features.remove('year')
+    """# Feature Importance - understanding which features are important:
 
     # Access feature importances
-    feature_importances = trained_models['Random Forest Regressor'].feature_importances_
+    feature_importances = trained_models['Lasso Regression'].feature_importances_
 
     # Create a DataFrame to display feature importances
-    features.remove('year')
     importance_df = pd.DataFrame({'Feature': features, 'Importance': feature_importances})
 
     # Sort the DataFrame by importance in descending order
     importance_df = importance_df.sort_values(by='Importance', ascending=False)
 
     # Print or visualize the feature importances
-    print(importance_df)
+    print(importance_df)"""
 
     return trained_models
 
@@ -539,20 +540,20 @@ def models_train_and_test_games(series_post, features, target):
     y_test = this_year_records[target]
     trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target, "GamesSimulator", FAST)
 
-    # Feature Importance - understanding which features are important:
+    features.remove('year')
+    """# Feature Importance - understanding which features are important:
 
     # Access feature importances
-    feature_importances = trained_models['Random Forest Regressor'].feature_importances_
+    feature_importances = trained_models['Lasso Regression'].feature_importances_
 
     # Create a DataFrame to display feature importances
-    features.remove('year')
     importance_df = pd.DataFrame({'Feature': features, 'Importance': feature_importances})
 
     # Sort the DataFrame by importance in descending order
     importance_df = importance_df.sort_values(by='Importance', ascending=False)
 
     # Print or visualize the feature importances
-    print(importance_df)
+    print(importance_df)"""
 
     return trained_models
 
@@ -650,7 +651,7 @@ def main():
     teams_post.drop(['lgID', 'W', 'L'], inplace=True, axis='columns')
     """
 
-    lag_years_players = 3
+    lag_years_players = 7
     features_to_be_lagged = ['FG_Percentage', 'FT_Percentage', 'PPG', 'EFF', 'DPR']
     dataframes_dict['players_teams'] = create_lagged_features_players(dataframes_dict['players_teams'],
                                                                       features_to_be_lagged, lag_years_players)
@@ -660,7 +661,7 @@ def main():
                 range(1, lag_years_players + 1)] + ['year']
     target = 'EFF'
     trained_models_players = models_train_and_test_players(dataframes_dict['players_teams'], features, target)
-    eff_model = trained_models_players['Random Forest Regressor']
+    eff_model = trained_models_players['Lasso Regression']
     dataframes_dict['players_teams'] = models_predict_future_players(dataframes_dict['players_teams'], features,
                                                                      features_to_be_lagged,
                                                                      eff_model,
@@ -670,7 +671,7 @@ def main():
     target = 'DPR'
 
     trained_models_players = models_train_and_test_players_dpr(dataframes_dict['players_teams'], features, target)
-    dpr_model = trained_models_players['Random Forest Regressor']
+    dpr_model = trained_models_players['Lasso Regression']
 
     dataframes_dict['players_teams'] = models_predict_future_players_dpr(dataframes_dict['players_teams'], features,
                                                                          features_to_be_lagged,
@@ -716,7 +717,7 @@ def main():
 
     dataframes_dict['teams'] = models_predict_future_teams(dataframes_dict['teams'], dataframes_dict['players_teams'],
                                                            team_map, features, features_to_be_lagged,
-                                                           trained_models_teams['Random Forest Regressor'],
+                                                           trained_models_teams['Lasso Regression'],
                                                            lag_years_teams)
 
     dataframes_dict['teams'] = dataframes_dict['teams'].sort_values(by='Predicted_Playoff', ascending=False)
@@ -725,7 +726,7 @@ def main():
     print("PREDICT NUMBER OF GAMES WON BY EACH TEAM")
 
     games_to_be_won = simulate_games(dataframes_dict['teams'],
-                                       trained_models_for_games['Random Forest Regressor'],
+                                       trained_models_for_games['Lasso Regression'],
                                        features_games)
 
     print(games_to_be_won.sort_values(by=['year', 'teamWins'], ascending=False).head(len(team_map)))
