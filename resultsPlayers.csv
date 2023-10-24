@@ -1,2 +1,0 @@
-Model,Scaler,Best Parameters,Best Score,Mean Absolute Error,Mean Squared Error,Root Mean Squared Error,R-squared
-Random Forest Regressor,None,"{'max_depth': 10, 'min_samples_leaf': 1, 'min_samples_split': 2, 'n_estimators': 50}",0.705470685228628,262.8468338505795,106393.0995442738,326.1795510823353,0.5094164795812745

@@ -199,7 +199,7 @@ def run_all(x_train_original, y_train_original, x_test_original, y_test_original
 
     if store:
         results_df = pd.DataFrame(results)
-        results_df.to_csv('results' + name + '.csv', index=False)
+        results_df.to_csv('results' + name + "_" + target_column + '.csv', index=False)
         save_models(trained_models, name, target_column)
 
     return dict([(x[0], y) for x, y in trained_models.items()])

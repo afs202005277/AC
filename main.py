@@ -1,9 +1,11 @@
+import time
+
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
 import models
 
-FAST = True
+FAST = False
 
 
 def progress(row):
@@ -507,6 +509,7 @@ def models_predict_future_teams(teams, players_teams, teams_map, features, featu
 
 
 def main():
+    start = time.time()
     # Load data from CSVs
     dataframes_dict = initial_data_load()
 
@@ -591,6 +594,8 @@ def main():
 
     dataframes_dict['teams'] = dataframes_dict['teams'].sort_values(by='Predicted_Playoff', ascending=False)
     print(dataframes_dict['teams'].head(len(team_map)))
+    end = time.time()
+    print("Time taken: " + str(end - start) + " seconds")
 
 
 main()

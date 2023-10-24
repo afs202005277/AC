@@ -1,0 +1,904 @@
+Initial Data Load
+Player Data Cleanup
+Merge Players Awards
+Feature Creation - Players Teams
+Merge Player Teams
+Series Post Data Cleanup
+Create Lagged Features Players
+Models Running - Players
+Finished analyzing Linear Regression with None
+Finished analyzing Random Forest Regressor with None
+Finished analyzing Gradient Boosting Regressor with None
+Finished analyzing Support Vector Regressor with None
+Finished analyzing Ridge Regression with None
+Finished analyzing Lasso Regression with None
+Finished analyzing MLP Regressor with None
+Finished analyzing Linear Regression with StandardScaler
+Finished analyzing Random Forest Regressor with StandardScaler
+Finished analyzing Gradient Boosting Regressor with StandardScaler
+Finished analyzing Support Vector Regressor with StandardScaler
+Finished analyzing Ridge Regression with StandardScaler
+Finished analyzing Lasso Regression with StandardScaler
+Finished analyzing MLP Regressor with StandardScaler
+Finished analyzing Linear Regression with MinMaxScaler
+Finished analyzing Random Forest Regressor with MinMaxScaler
+Finished analyzing Gradient Boosting Regressor with MinMaxScaler
+Finished analyzing Support Vector Regressor with MinMaxScaler
+Finished analyzing Ridge Regression with MinMaxScaler
+Finished analyzing Lasso Regression with MinMaxScaler
+Finished analyzing MLP Regressor with MinMaxScaler
+Finished analyzing Linear Regression with RobustScaler
+Finished analyzing Random Forest Regressor with RobustScaler
+Finished analyzing Gradient Boosting Regressor with RobustScaler
+Finished analyzing Support Vector Regressor with RobustScaler
+Finished analyzing Ridge Regression with RobustScaler
+Finished analyzing Lasso Regression with RobustScaler
+Finished analyzing MLP Regressor with RobustScaler
+Finished analyzing Linear Regression with MaxAbsScaler
+Finished analyzing Random Forest Regressor with MaxAbsScaler
+Finished analyzing Gradient Boosting Regressor with MaxAbsScaler
+Finished analyzing Support Vector Regressor with MaxAbsScaler
+Finished analyzing Ridge Regression with MaxAbsScaler
+Finished analyzing Lasso Regression with MaxAbsScaler
+Finished analyzing MLP Regressor with MaxAbsScaler
+Finished analyzing Linear Regression with Normalizer
+Finished analyzing Random Forest Regressor with Normalizer
+Finished analyzing Gradient Boosting Regressor with Normalizer
+Finished analyzing Support Vector Regressor with Normalizer
+Finished analyzing Ridge Regression with Normalizer
+Finished analyzing Lasso Regression with Normalizer
+Finished analyzing MLP Regressor with Normalizer
+                Feature  Importance
+3   FT_Percentage_Lag_1    0.269884
+9             EFF_Lag_1    0.216241
+6             PPG_Lag_1    0.164893
+0   FG_Percentage_Lag_1    0.089012
+7             PPG_Lag_2    0.041403
+4   FT_Percentage_Lag_2    0.039883
+10            EFF_Lag_2    0.037806
+12            DPR_Lag_1    0.035867
+1   FG_Percentage_Lag_2    0.028603
+13            DPR_Lag_2    0.016874
+5   FT_Percentage_Lag_3    0.013532
+8             PPG_Lag_3    0.013285
+2   FG_Percentage_Lag_3    0.012093
+11            EFF_Lag_3    0.011645
+14            DPR_Lag_3    0.008978
+Models Predicting - Players
+Create Lagged Features Players
+Models Running - Players
+Finished analyzing Linear Regression with None
+Finished analyzing Random Forest Regressor with None
+Finished analyzing Gradient Boosting Regressor with None
+Finished analyzing Support Vector Regressor with None
+Finished analyzing Ridge Regression with None
+Finished analyzing Lasso Regression with None
+Finished analyzing MLP Regressor with None
+Finished analyzing Linear Regression with StandardScaler
+Finished analyzing Random Forest Regressor with StandardScaler
+Finished analyzing Gradient Boosting Regressor with StandardScaler
+Finished analyzing Support Vector Regressor with StandardScaler
+Finished analyzing Ridge Regression with StandardScaler
+Finished analyzing Lasso Regression with StandardScaler
+Finished analyzing MLP Regressor with StandardScaler
+Finished analyzing Linear Regression with MinMaxScaler
+Finished analyzing Random Forest Regressor with MinMaxScaler
+Finished analyzing Gradient Boosting Regressor with MinMaxScaler
+Finished analyzing Support Vector Regressor with MinMaxScaler
+Finished analyzing Ridge Regression with MinMaxScaler
+Finished analyzing Lasso Regression with MinMaxScaler
+Finished analyzing MLP Regressor with MinMaxScaler
+Finished analyzing Linear Regression with RobustScaler
+Finished analyzing Random Forest Regressor with RobustScaler
+Finished analyzing Gradient Boosting Regressor with RobustScaler
+Finished analyzing Support Vector Regressor with RobustScaler
+Finished analyzing Ridge Regression with RobustScaler
+Finished analyzing Lasso Regression with RobustScaler
+Finished analyzing MLP Regressor with RobustScaler
+Finished analyzing Linear Regression with MaxAbsScaler
+Finished analyzing Random Forest Regressor with MaxAbsScaler
+Finished analyzing Gradient Boosting Regressor with MaxAbsScaler
+Finished analyzing Support Vector Regressor with MaxAbsScaler
+Finished analyzing Ridge Regression with MaxAbsScaler
+Finished analyzing Lasso Regression with MaxAbsScaler
+Finished analyzing MLP Regressor with MaxAbsScaler
+Finished analyzing Linear Regression with Normalizer
+Finished analyzing Random Forest Regressor with Normalizer
+Finished analyzing Gradient Boosting Regressor with Normalizer
+Finished analyzing Support Vector Regressor with Normalizer
+Finished analyzing Ridge Regression with Normalizer
+Finished analyzing Lasso Regression with Normalizer
+Finished analyzing MLP Regressor with Normalizer
+                Feature  Importance
+15        Predicted_EFF    0.448745
+12            DPR_Lag_1    0.123567
+6             PPG_Lag_1    0.083580
+3   FT_Percentage_Lag_1    0.046687
+0   FG_Percentage_Lag_1    0.045552
+9             EFF_Lag_1    0.044256
+1   FG_Percentage_Lag_2    0.037955
+2   FG_Percentage_Lag_3    0.036168
+4   FT_Percentage_Lag_2    0.030712
+5   FT_Percentage_Lag_3    0.021618
+10            EFF_Lag_2    0.019583
+13            DPR_Lag_2    0.017315
+14            DPR_Lag_3    0.014462
+7             PPG_Lag_2    0.013571
+11            EFF_Lag_3    0.008613
+8             PPG_Lag_3    0.007618
+Models Predicting - Players
+Create Lagged Features Players
+PLAYERS MODELS DONE
+Feature Creation - Teams
+Teams Data Cleanup
+Create Lagged Features Teams
+Models Running - Teams
+   y_test y_pred
+0       Y      Y
+1       Y      Y
+2       Y      Y
+3       N      Y
+4       Y      Y
+5       Y      Y
+6       N      Y
+7       N      Y
+8       Y      N
+9       N      N
+10      N      N
+11      Y      N
+12      Y      N
+[[2 3]
+ [3 5]]
+Finished analyzing Linear Regression with None
+   y_test y_pred
+0       Y      Y
+1       N      Y
+2       Y      Y
+3       N      Y
+4       Y      Y
+5       Y      Y
+6       Y      Y
+7       N      Y
+8       Y      N
+9       Y      N
+10      N      N
+11      N      N
+12      Y      N
+[[2 3]
+ [3 5]]
+Finished analyzing Random Forest Regressor with None
+   y_test y_pred
+0       Y      Y
+1       N      Y
+2       Y      Y
+3       N      Y
+4       Y      Y
+5       N      Y
+6       Y      Y
+7       Y      Y
+8       Y      N
+9       N      N
+10      Y      N
+11      N      N
+12      Y      N
+[[2 3]
+ [3 5]]
+Finished analyzing Gradient Boosting Regressor with None
+   y_test y_pred
+0       Y      Y
+1       Y      Y
+2       N      Y
+3       Y      Y
+4       Y      Y
+5       Y      Y
+6       N      Y
+7       Y      Y
+8       N      N
+9       N      N
+10      N      N
+11      Y      N
+12      Y      N
+[[3 2]
+ [2 6]]
+Finished analyzing Support Vector Regressor with None
+   y_test y_pred
+0       Y      Y
+1       Y      Y
+2       Y      Y
+3       N      Y
+4       Y      Y
+5       Y      Y
+6       N      Y
+7       N      Y
+8       Y      N
+9       N      N
+10      N      N
+11      Y      N
+12      Y      N
+[[2 3]
+ [3 5]]
+Finished analyzing Ridge Regression with None
+   y_test y_pred
+0       Y      Y
+1       Y      Y
+2       Y      Y
+3       N      Y
+4       Y      Y
+5       Y      Y
+6       Y      Y
+7       Y      Y
+8       N      N
+9       N      N
+10      N      N
+11      N      N
+12      Y      N
+[[4 1]
+ [1 7]]
+Finished analyzing Lasso Regression with None
+   y_test y_pred
+0       Y      Y
+1       N      Y
+2       Y      Y
+3       N      Y
+4       Y      Y
+5       Y      Y
+6       N      Y
+7       Y      Y
+8       Y      N
+9       N      N
+10      Y      N
+11      N      N
+12      Y      N
+[[2 3]
+ [3 5]]
+Finished analyzing MLP Regressor with None
+   y_test y_pred
+0       Y      Y
+1       Y      Y
+2       Y      Y
+3       N      Y
+4       Y      Y
+5       Y      Y
+6       N      Y
+7       N      Y
+8       Y      N
+9       N      N
+10      N      N
+11      Y      N
+12      Y      N
+[[2 3]
+ [3 5]]
+Finished analyzing Linear Regression with StandardScaler
+   y_test y_pred
+0       Y      Y
+1       N      Y
+2       Y      Y
+3       Y      Y
+4       N      Y
+5       Y      Y
+6       Y      Y
+7       Y      Y
+8       N      N
+9       N      N
+10      Y      N
+11      N      N
+12      Y      N
+[[3 2]
+ [2 6]]
+Finished analyzing Random Forest Regressor with StandardScaler
+   y_test y_pred
+0       Y      Y
+1       N      Y
+2       Y      Y
+3       N      Y
+4       Y      Y
+5       N      Y
+6       Y      Y
+7       Y      Y
+8       Y      N
+9       N      N
+10      Y      N
+11      N      N
+12      Y      N
+[[2 3]
+ [3 5]]
+Finished analyzing Gradient Boosting Regressor with StandardScaler
+   y_test y_pred
+0       Y      Y
+1       N      Y
+2       N      Y
+3       Y      Y
+4       Y      Y
+5       Y      Y
+6       Y      Y
+7       N      Y
+8       Y      N
+9       N      N
+10      Y      N
+11      N      N
+12      Y      N
+[[2 3]
+ [3 5]]
+Finished analyzing Support Vector Regressor with StandardScaler
+   y_test y_pred
+0       Y      Y
+1       Y      Y
+2       Y      Y
+3       N      Y
+4       Y      Y
+5       Y      Y
+6       N      Y
+7       N      Y
+8       Y      N
+9       N      N
+10      N      N
+11      Y      N
+12      Y      N
+[[2 3]
+ [3 5]]
+Finished analyzing Ridge Regression with StandardScaler
+   y_test y_pred
+0       Y      Y
+1       Y      Y
+2       Y      Y
+3       Y      Y
+4       N      Y
+5       Y      Y
+6       N      Y
+7       N      Y
+8       Y      N
+9       N      N
+10      N      N
+11      Y      N
+12      Y      N
+[[2 3]
+ [3 5]]
+Finished analyzing Lasso Regression with StandardScaler
+   y_test y_pred
+0       Y      Y
+1       Y      Y
+2       Y      Y
+3       Y      Y
+4       N      Y
+5       N      Y
+6       Y      Y
+7       Y      Y
+8       Y      N
+9       N      N
+10      N      N
+11      N      N
+12      Y      N
+[[3 2]
+ [2 6]]
+Finished analyzing MLP Regressor with StandardScaler
+   y_test y_pred
+0       Y      Y
+1       Y      Y
+2       Y      Y
+3       N      Y
+4       Y      Y
+5       Y      Y
+6       N      Y
+7       N      Y
+8       Y      N
+9       N      N
+10      N      N
+11      Y      N
+12      Y      N
+[[2 3]
+ [3 5]]
+Finished analyzing Linear Regression with MinMaxScaler
+   y_test y_pred
+0       Y      Y
+1       Y      Y
+2       N      Y
+3       N      Y
+4       Y      Y
+5       Y      Y
+6       Y      Y
+7       N      Y
+8       N      N
+9       Y      N
+10      Y      N
+11      N      N
+12      Y      N
+[[2 3]
+ [3 5]]
+Finished analyzing Random Forest Regressor with MinMaxScaler
+   y_test y_pred
+0       Y      Y
+1       N      Y
+2       Y      Y
+3       N      Y
+4       Y      Y
+5       N      Y
+6       Y      Y
+7       Y      Y
+8       Y      N
+9       Y      N
+10      N      N
+11      N      N
+12      Y      N
+[[2 3]
+ [3 5]]
+Finished analyzing Gradient Boosting Regressor with MinMaxScaler
+   y_test y_pred
+0       Y      Y
+1       Y      Y
+2       N      Y
+3       N      Y
+4       Y      Y
+5       Y      Y
+6       N      Y
+7       Y      Y
+8       N      N
+9       Y      N
+10      Y      N
+11      N      N
+12      Y      N
+[[2 3]
+ [3 5]]
+Finished analyzing Support Vector Regressor with MinMaxScaler
+   y_test y_pred
+0       Y      Y
+1       Y      Y
+2       Y      Y
+3       Y      Y
+4       N      Y
+5       Y      Y
+6       N      Y
+7       N      Y
+8       N      N
+9       Y      N
+10      Y      N
+11      N      N
+12      Y      N
+[[2 3]
+ [3 5]]
+Finished analyzing Ridge Regression with MinMaxScaler
+   y_test y_pred
+0       Y      Y
+1       N      Y
+2       N      Y
+3       Y      Y
+4       Y      Y
+5       Y      Y
+6       N      Y
+7       N      Y
+8       Y      N
+9       N      N
+10      Y      N
+11      Y      N
+12      Y      N
+[[1 4]
+ [4 4]]
+Finished analyzing Lasso Regression with MinMaxScaler
+   y_test y_pred
+0       Y      Y
+1       Y      Y
+2       Y      Y
+3       Y      Y
+4       N      Y
+5       N      Y
+6       Y      Y
+7       N      Y
+8       N      N
+9       N      N
+10      Y      N
+11      Y      N
+12      Y      N
+[[2 3]
+ [3 5]]
+Finished analyzing MLP Regressor with MinMaxScaler
+   y_test y_pred
+0       Y      Y
+1       Y      Y
+2       Y      Y
+3       N      Y
+4       Y      Y
+5       Y      Y
+6       N      Y
+7       N      Y
+8       Y      N
+9       N      N
+10      N      N
+11      Y      N
+12      Y      N
+[[2 3]
+ [3 5]]
+Finished analyzing Linear Regression with RobustScaler
+   y_test y_pred
+0       Y      Y
+1       Y      Y
+2       N      Y
+3       N      Y
+4       Y      Y
+5       Y      Y
+6       Y      Y
+7       N      Y
+8       Y      N
+9       Y      N
+10      N      N
+11      N      N
+12      Y      N
+[[2 3]
+ [3 5]]
+Finished analyzing Random Forest Regressor with RobustScaler
+   y_test y_pred
+0       Y      Y
+1       Y      Y
+2       N      Y
+3       Y      Y
+4       N      Y
+5       Y      Y
+6       N      Y
+7       Y      Y
+8       N      N
+9       Y      N
+10      N      N
+11      Y      N
+12      Y      N
+[[2 3]
+ [3 5]]
+Finished analyzing Gradient Boosting Regressor with RobustScaler
+   y_test y_pred
+0       Y      Y
+1       Y      Y
+2       Y      Y
+3       N      Y
+4       Y      Y
+5       N      Y
+6       Y      Y
+7       Y      Y
+8       N      N
+9       N      N
+10      N      N
+11      Y      N
+12      Y      N
+[[3 2]
+ [2 6]]
+Finished analyzing Support Vector Regressor with RobustScaler
+   y_test y_pred
+0       Y      Y
+1       Y      Y
+2       Y      Y
+3       N      Y
+4       Y      Y
+5       Y      Y
+6       N      Y
+7       N      Y
+8       Y      N
+9       N      N
+10      N      N
+11      Y      N
+12      Y      N
+[[2 3]
+ [3 5]]
+Finished analyzing Ridge Regression with RobustScaler
+   y_test y_pred
+0       Y      Y
+1       Y      Y
+2       Y      Y
+3       N      Y
+4       N      Y
+5       Y      Y
+6       N      Y
+7       Y      Y
+8       Y      N
+9       N      N
+10      N      N
+11      Y      N
+12      Y      N
+[[2 3]
+ [3 5]]
+Finished analyzing Lasso Regression with RobustScaler
+   y_test y_pred
+0       Y      Y
+1       Y      Y
+2       N      Y
+3       Y      Y
+4       Y      Y
+5       N      Y
+6       Y      Y
+7       N      Y
+8       Y      N
+9       Y      N
+10      Y      N
+11      N      N
+12      N      N
+[[2 3]
+ [3 5]]
+Finished analyzing MLP Regressor with RobustScaler
+   y_test y_pred
+0       Y      Y
+1       Y      Y
+2       Y      Y
+3       N      Y
+4       Y      Y
+5       Y      Y
+6       N      Y
+7       N      Y
+8       Y      N
+9       N      N
+10      N      N
+11      Y      N
+12      Y      N
+[[2 3]
+ [3 5]]
+Finished analyzing Linear Regression with MaxAbsScaler
+   y_test y_pred
+0       Y      Y
+1       N      Y
+2       N      Y
+3       Y      Y
+4       Y      Y
+5       Y      Y
+6       Y      Y
+7       N      Y
+8       Y      N
+9       N      N
+10      Y      N
+11      N      N
+12      Y      N
+[[2 3]
+ [3 5]]
+Finished analyzing Random Forest Regressor with MaxAbsScaler
+   y_test y_pred
+0       Y      Y
+1       N      Y
+2       Y      Y
+3       N      Y
+4       Y      Y
+5       N      Y
+6       Y      Y
+7       N      Y
+8       Y      N
+9       Y      N
+10      N      N
+11      Y      N
+12      Y      N
+[[1 4]
+ [4 4]]
+Finished analyzing Gradient Boosting Regressor with MaxAbsScaler
+   y_test y_pred
+0       Y      Y
+1       Y      Y
+2       Y      Y
+3       Y      Y
+4       Y      Y
+5       N      Y
+6       N      Y
+7       N      Y
+8       Y      N
+9       N      N
+10      N      N
+11      Y      N
+12      Y      N
+[[2 3]
+ [3 5]]
+Finished analyzing Support Vector Regressor with MaxAbsScaler
+   y_test y_pred
+0       Y      Y
+1       Y      Y
+2       Y      Y
+3       N      Y
+4       Y      Y
+5       Y      Y
+6       N      Y
+7       N      Y
+8       Y      N
+9       N      N
+10      N      N
+11      Y      N
+12      Y      N
+[[2 3]
+ [3 5]]
+Finished analyzing Ridge Regression with MaxAbsScaler
+   y_test y_pred
+0       Y      Y
+1       N      Y
+2       N      Y
+3       Y      Y
+4       Y      Y
+5       Y      Y
+6       N      Y
+7       N      Y
+8       Y      N
+9       N      N
+10      Y      N
+11      Y      N
+12      Y      N
+[[1 4]
+ [4 4]]
+Finished analyzing Lasso Regression with MaxAbsScaler
+   y_test y_pred
+0       Y      Y
+1       Y      Y
+2       Y      Y
+3       Y      Y
+4       Y      Y
+5       N      Y
+6       N      Y
+7       Y      Y
+8       N      N
+9       N      N
+10      N      N
+11      Y      N
+12      Y      N
+[[3 2]
+ [2 6]]
+Finished analyzing MLP Regressor with MaxAbsScaler
+   y_test y_pred
+0       Y      Y
+1       Y      Y
+2       Y      Y
+3       N      Y
+4       Y      Y
+5       N      Y
+6       Y      Y
+7       Y      Y
+8       N      N
+9       N      N
+10      N      N
+11      Y      N
+12      Y      N
+[[3 2]
+ [2 6]]
+Finished analyzing Linear Regression with Normalizer
+   y_test y_pred
+0       Y      Y
+1       Y      Y
+2       Y      Y
+3       N      Y
+4       Y      Y
+5       Y      Y
+6       N      Y
+7       N      Y
+8       N      N
+9       N      N
+10      Y      N
+11      Y      N
+12      Y      N
+[[2 3]
+ [3 5]]
+Finished analyzing Random Forest Regressor with Normalizer
+   y_test y_pred
+0       Y      Y
+1       Y      Y
+2       Y      Y
+3       Y      Y
+4       Y      Y
+5       Y      Y
+6       Y      Y
+7       N      Y
+8       Y      N
+9       N      N
+10      N      N
+11      N      N
+12      N      N
+[[4 1]
+ [1 7]]
+Finished analyzing Gradient Boosting Regressor with Normalizer
+   y_test y_pred
+0       Y      Y
+1       Y      Y
+2       N      Y
+3       N      Y
+4       Y      Y
+5       Y      Y
+6       Y      Y
+7       N      Y
+8       Y      N
+9       Y      N
+10      N      N
+11      N      N
+12      Y      N
+[[2 3]
+ [3 5]]
+Finished analyzing Support Vector Regressor with Normalizer
+   y_test y_pred
+0       Y      Y
+1       N      Y
+2       Y      Y
+3       Y      Y
+4       Y      Y
+5       Y      Y
+6       N      Y
+7       N      Y
+8       Y      N
+9       Y      N
+10      N      N
+11      N      N
+12      Y      N
+[[2 3]
+ [3 5]]
+Finished analyzing Ridge Regression with Normalizer
+   y_test y_pred
+0       Y      Y
+1       N      Y
+2       N      Y
+3       Y      Y
+4       Y      Y
+5       Y      Y
+6       N      Y
+7       N      Y
+8       Y      N
+9       N      N
+10      Y      N
+11      Y      N
+12      Y      N
+[[1 4]
+ [4 4]]
+Finished analyzing Lasso Regression with Normalizer
+   y_test y_pred
+0       Y      Y
+1       N      Y
+2       N      Y
+3       Y      Y
+4       Y      Y
+5       Y      Y
+6       Y      Y
+7       Y      Y
+8       N      N
+9       N      N
+10      N      N
+11      Y      N
+12      Y      N
+[[3 2]
+ [2 6]]
+Finished analyzing MLP Regressor with Normalizer
+                        Feature  Importance
+21               progress_Lag_1    0.090779
+0      PredictedTeamScore_Lag_1    0.065481
+16            awayWLRatio_Lag_2    0.061664
+4   defensive_performance_Lag_2    0.059942
+22               progress_Lag_2    0.056979
+12            homeWLRatio_Lag_1    0.049178
+6   offensive_performance_Lag_1    0.046891
+7   offensive_performance_Lag_2    0.044500
+3   defensive_performance_Lag_1    0.042621
+27           PredictedTeamScore    0.041413
+17            awayWLRatio_Lag_3    0.036889
+19            confWLRatio_Lag_2    0.036536
+15            awayWLRatio_Lag_1    0.033165
+9            gamesWLRatio_Lag_1    0.031134
+5   defensive_performance_Lag_3    0.030113
+13            homeWLRatio_Lag_2    0.029773
+2      PredictedTeamScore_Lag_3    0.027282
+8   offensive_performance_Lag_3    0.026982
+1      PredictedTeamScore_Lag_2    0.024525
+18            confWLRatio_Lag_1    0.023340
+14            homeWLRatio_Lag_3    0.020526
+10           gamesWLRatio_Lag_2    0.018305
+24                playoff_Lag_1    0.017736
+26                playoff_Lag_3    0.017639
+20            confWLRatio_Lag_3    0.017305
+25                playoff_Lag_2    0.016577
+23               progress_Lag_3    0.016414
+11           gamesWLRatio_Lag_3    0.016311
+Models Predicting - Teams
+Create Lagged Features Teams
+     year  tmID franchID_x  ... playoff_Lag_2_y  playoff_Lag_3_y  Predicted_Playoff
+146    11     4          4  ...             1.0              1.0            0.58000
+153    11    11         11  ...             1.0              1.0            0.58000
+157    11    15         15  ...             1.0              1.0            0.58000
+144    11     2          2  ...             0.0              0.0            0.54500
+150    11     8          8  ...             1.0              0.0            0.54500
+152    11    10         10  ...             0.0              0.0            0.54500
+161    11    19         19  ...             0.0              0.0            0.51300
+147    11     5          5  ...             1.0              1.0            0.49500
+149    11     7          7  ...             1.0              1.0            0.49500
+158    11    16         16  ...             1.0              1.0            0.49500
+159    11    17         17  ...             1.0              1.0            0.49500
+155    11    13         13  ...             0.0              1.0            0.47800
+142    11     0          0  ...             0.0              0.5            0.45175
+0       9     0        ATL  ...             NaN              NaN                NaN
+1      10     0        ATL  ...             NaN              NaN                NaN
+2       1     1        CHA  ...             NaN              NaN                NaN
+3       2     1        CHA  ...             NaN              NaN                NaN
+4       3     1        CHA  ...             NaN              NaN                NaN
+5       4     1        CHA  ...             NaN              NaN                NaN
+6       5     1        CHA  ...             NaN              NaN                NaN
+
+[20 rows x 88 columns]
+Time taken: 5779.5606100559235 seconds
