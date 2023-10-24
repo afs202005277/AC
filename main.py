@@ -731,5 +731,47 @@ def main():
 
     print(games_to_be_won.sort_values(by=['year', 'teamWins'], ascending=False).head(len(team_map)))
 
+    games_to_be_won = games_to_be_won.merge(dataframes_dict['teams'][['year', 'tmID', 'playoff_x']],
+                                      left_on=['team', 'year'],
+                                      right_on=['tmID', 'year'], how='left')
+
+    games_to_be_won.dropna(inplace=True)
+
+    # Rank teams within each year based on 'teamWins' in descending order
+    games_to_be_won['rank'] = games_to_be_won.groupby('year')['teamWins'].rank(method='min', ascending=False)
+
+    # Assign 'Y' to top 8 teams and 'N' to the rest
+    games_to_be_won['playoffs'] = games_to_be_won['rank'].apply(lambda x: 'Y' if x <= 8 else 'N')
+
+    # Drop the intermediate 'rank' column if needed
+    games_to_be_won.drop(columns=['rank'], inplace=True)
+
+    metrics_data = games_to_be_won.copy()
+
+    metrics_data["playoff_x"][metrics_data["playoff_x"] == 1] = 'Y'
+    metrics_data["playoff_x"][metrics_data["playoff_x"] == 0] = 'N'
+
+    metrics_data = metrics_data[metrics_data["year"] == 10]
+
+    y_test = metrics_data['playoff_x']
+    y_pred = metrics_data['playoffs']
+
+    from sklearn.metrics import (accuracy_score, precision_score,
+                                 recall_score, f1_score, confusion_matrix)
+
+    print("Game Simulation (Metrics):\n")
+
+    accuracy = accuracy_score(y_test, y_pred)
+    print(f"Accuracy: {accuracy*100.0}%")
+    precision = precision_score(y_test, y_pred, pos_label='Y')
+    print(f"Precision: {precision*100.0}%")
+    recall = recall_score(y_test, y_pred, pos_label='Y')
+    print(f"Recall: {recall*100.0}%")
+    f1 = f1_score(y_test, y_pred, pos_label='Y')
+    print(f"F1 Score: {f1*100.0}%")
+    conf_matrix = confusion_matrix(y_test, y_pred)
+    print("Confusion Matrix")
+    print(conf_matrix)
+
 
 main()
