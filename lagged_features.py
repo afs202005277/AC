@@ -1,5 +1,6 @@
 def create_lagged_features(dataframe, features_to_be_lagged, lag_years, group_by_column_name):
     tmp = "Teams" if group_by_column_name == 'tmID' else 'Players'
+    dataframe = dataframe.loc[:, ~dataframe.columns.duplicated(keep='first')]
     print("Create Lagged Features " + tmp)
     # Create lagged features
     for feat in features_to_be_lagged:

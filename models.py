@@ -11,6 +11,7 @@ from math import sqrt
 import os
 import joblib
 from CustomCrossValidator import CustomCrossValidator
+from lagged_features import create_lagged_features
 
 slow_regression_models = [
     {
@@ -88,7 +89,7 @@ def save_models(trained_models, name, target_col):
         # Remove spaces and create the file name
         model_path = build_file_name(model_name, name, scaler_name, target_col)
         # Save the model to the specified path
-        joblib.dump(model, model_path)
+        # joblib.dump(model, model_path)
 
 
 def scale_dataframe(scaler, x_train, x_test):
@@ -103,7 +104,7 @@ def scale_dataframe(scaler, x_train, x_test):
 
 
 def run_all(x_train_original, y_train_original, x_test_original, y_test_original, min_years, max_years, target_column,
-            name, fast):
+            name, fast, to_delete_features):
     global scalers
     results = []
     trained_models = {}
@@ -127,16 +128,24 @@ def run_all(x_train_original, y_train_original, x_test_original, y_test_original
             model_name = model_info['name']
 
             try:
-                trained_models[(model_name, scaler_name)] = joblib.load(build_file_name(model_name, name, scaler_name, target_column))
+                trained_models[(model_name, scaler_name)] = joblib.load(
+                    build_file_name(model_name, name, scaler_name, target_column))
             except FileNotFoundError:
                 store = True
-                cross_validator_elements = CustomCrossValidator(min_years, max_years, target_column, group_by).split(
+                cross_validator_elements = CustomCrossValidator(min_years, max_years, target_column, group_by,
+                                                                to_delete_features).split(
                     x_train.copy(),
                     y_train.copy())
                 grid_search = GridSearchCV(model, params, cv=cross_validator_elements, n_jobs=-1)
+
+                x_train = create_lagged_features(x_train_original.copy(), to_delete_features, 7, group_by)
+                x_test = create_lagged_features(x_test_original.copy(), to_delete_features, 7, group_by)
+                x_train.drop(to_delete_features, axis=1, inplace=True)
+                x_test.drop(to_delete_features, axis=1, inplace=True)
+                x_train, x_test = scale_dataframe(scaler, x_train, x_test)
                 x_train.drop(['year', group_by], axis=1, inplace=True)
                 x_test.drop(['year', group_by], axis=1, inplace=True)
-                x_train, x_test = scale_dataframe(scaler, x_train, x_test)
+
                 grid_search.fit(x_train, y_train)
                 trained_model = grid_search.best_estimator_
                 best_params = str(grid_search.best_params_)
