@@ -1,7 +1,8 @@
 import pandas as pd
 from sklearn.model_selection import GridSearchCV
-from sklearn.linear_model import LinearRegression, Ridge, Lasso
+from sklearn.linear_model import LinearRegression, Ridge, Lasso, BayesianRidge, ElasticNet
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+from sklearn.neighbors import KNeighborsRegressor
 from sklearn.neural_network import MLPRegressor
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler, MaxAbsScaler, Normalizer
 from sklearn.svm import SVR
@@ -10,6 +11,8 @@ from sklearn.metrics import (mean_absolute_error, mean_squared_error, r2_score, 
 from math import sqrt
 import os
 import joblib
+from sklearn.tree import DecisionTreeRegressor
+
 from CustomCrossValidator import CustomCrossValidator
 from lagged_features import create_lagged_features
 
@@ -18,7 +21,7 @@ slow_regression_models = [
         'name': 'Linear Regression',
         'model': LinearRegression(),
         'params': {'fit_intercept': [True, False],
-                   'copy_X': [True, False]}
+                   'positive': [True, False]}
     },
     {
         'name': 'Random Forest Regressor',
@@ -26,38 +29,67 @@ slow_regression_models = [
         'params': {'n_estimators': [50, 100, 200],
                    'max_depth': [None, 10, 20, 30],
                    'min_samples_split': [2, 5, 10],
-                   'min_samples_leaf': [1, 2, 4]}
+                   'min_samples_leaf': [1, 2, 4],
+                   'max_features': ['sqrt', 'log2', None],
+                   'bootstrap': [True, False]
+                   }
     },
     {
         'name': 'Gradient Boosting Regressor',
         'model': GradientBoostingRegressor(),
         'params': {'n_estimators': [50, 100, 200],
                    'learning_rate': [0.01, 0.1, 0.2],
-                   'max_depth': [3, 4, 5]}
+                   'max_depth': [3, 4, 5],
+                   'subsample': [0.8, 0.9, 1.0]}
     },
     {
         'name': 'Support Vector Regressor',
         'model': SVR(),
         'params': {'C': [0.1, 1, 10],
-                   'kernel': ['linear', 'rbf'],
+                   'kernel': ['linear', 'rbf', 'poly'],
                    'epsilon': [0.1, 0.2, 0.5]}
     },
     {
         'name': 'Ridge Regression',
         'model': Ridge(),
-        'params': {'alpha': [0.1, 1, 10]}
+        'params': {'alpha': [0.1, 1, 10],
+                   'solver': ['auto', 'svd', 'cholesky', 'lsqr', 'sag', 'saga']}
     },
     {
         'name': 'Lasso Regression',
         'model': Lasso(),
-        'params': {'alpha': [0.1, 1, 10]}
+        'params': {'alpha': [0.1, 1, 10], 'positive': [True, False], 'max_iter': [1000, 2000, 3000]}
     },
     {
         'name': 'MLP Regressor',
         'model': MLPRegressor(),
         'params': {'hidden_layer_sizes': [(50,), (100,), (50, 50)],
                    'activation': ['relu', 'tanh'],
-                   'alpha': [0.0001, 0.001, 0.01]}
+                   'alpha': [0.0001, 0.001, 0.01],
+                   'learning_rate': ['constant', 'invscaling', 'adaptive']}
+    }
+]
+
+additional_regression_models = [
+    {
+        'name': 'ElasticNet Regression',
+        'model': ElasticNet(),
+        'params': {'alpha': [0.1, 1, 10],
+                   'l1_ratio': [0.1, 0.5, 0.9]}
+    },
+    {
+        'name': 'K-Nearest Neighbors Regressor',
+        'model': KNeighborsRegressor(),
+        'params': {'n_neighbors': [5, 10, 20],
+                   'weights': ['uniform', 'distance'],
+                   'p': [1, 2]}
+    },
+    {
+        'name': 'Decision Tree Regressor',
+        'model': DecisionTreeRegressor(),
+        'params': {'max_depth': [None, 10, 20, 30],
+                   'min_samples_split': [2, 5, 10],
+                   'min_samples_leaf': [1, 2, 4]}
     }
 ]
 
@@ -115,7 +147,7 @@ def run_all(x_train_original, y_train_original, x_test_original, y_test_original
         regression_models = fast_regression_models
         scalers = {'None': scalers['None']}
     else:
-        regression_models = slow_regression_models
+        regression_models = slow_regression_models + additional_regression_models
 
     for scaler_name, scaler in scalers.items():
         for model_info in regression_models:
@@ -142,9 +174,9 @@ def run_all(x_train_original, y_train_original, x_test_original, y_test_original
                 x_test = create_lagged_features(x_test_original.copy(), to_delete_features, 7, group_by)
                 x_train.drop(to_delete_features, axis=1, inplace=True)
                 x_test.drop(to_delete_features, axis=1, inplace=True)
-                x_train, x_test = scale_dataframe(scaler, x_train, x_test)
                 x_train.drop(['year', group_by], axis=1, inplace=True)
                 x_test.drop(['year', group_by], axis=1, inplace=True)
+                x_train, x_test = scale_dataframe(scaler, x_train, x_test)
 
                 grid_search.fit(x_train, y_train)
                 trained_model = grid_search.best_estimator_
@@ -209,7 +241,7 @@ def run_all(x_train_original, y_train_original, x_test_original, y_test_original
 
     if store:
         results_df = pd.DataFrame(results)
-        results_df.to_csv('results' + name + '.csv', index=False)
+        results_df.to_csv('results' + name + '_' + target_column + '.csv', index=False)
         save_models(trained_models, name, target_column)
 
     return dict([(x[0], y) for x, y in trained_models.items()])
