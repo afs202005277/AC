@@ -4,7 +4,10 @@ from sklearn.preprocessing import LabelEncoder
 import models
 
 FAST = True
-
+MODEL_PLAYERS_EFF = "Random Forest Regressor"
+MODEL_PLAYERS_DPR = "Random Forest Regressor"
+MODEL_TEAMS = "Linear SVC"
+MODEL_GAMES_SIM = "Random Forest Regressor"
 
 def progress(row):
     if pd.isnull(row['firstRound']):
@@ -674,7 +677,7 @@ def main():
                 range(1, lag_years_players + 1)] + ['year']
     target = 'EFF'
     trained_models_players = models_train_and_test_players(dataframes_dict['players_teams'], features, target)
-    eff_model = trained_models_players['Random Forest Regressor']
+    eff_model = trained_models_players[MODEL_PLAYERS_EFF]
     dataframes_dict['players_teams'] = models_predict_future_players(dataframes_dict['players_teams'], features,
                                                                      features_to_be_lagged,
                                                                      eff_model,
@@ -684,7 +687,7 @@ def main():
     target = 'DPR'
 
     trained_models_players = models_train_and_test_players_dpr(dataframes_dict['players_teams'], features, target)
-    dpr_model = trained_models_players['Random Forest Regressor']
+    dpr_model = trained_models_players[MODEL_PLAYERS_DPR]
 
     dataframes_dict['players_teams'] = models_predict_future_players_dpr(dataframes_dict['players_teams'], features,
                                                                          features_to_be_lagged,
@@ -730,7 +733,7 @@ def main():
 
     dataframes_dict['teams'] = models_predict_future_teams(dataframes_dict['teams'], dataframes_dict['players_teams'],
                                                            team_map, features, features_to_be_lagged,
-                                                           trained_models_teams['Lasso Regression'],
+                                                           trained_models_teams[MODEL_TEAMS],
                                                            lag_years_teams)
 
     dataframes_dict['teams'] = dataframes_dict['teams'].sort_values(by='Predicted_Playoff', ascending=False)
@@ -739,7 +742,7 @@ def main():
     print("PREDICT NUMBER OF GAMES WON BY EACH TEAM")
 
     games_to_be_won = simulate_games(dataframes_dict['teams'],
-                                       trained_models_for_games['Lasso Regression'],
+                                       trained_models_for_games[MODEL_GAMES_SIM],
                                        features_games)
 
     print(games_to_be_won.sort_values(by=['year', 'teamWins'], ascending=False).head(len(team_map)))
