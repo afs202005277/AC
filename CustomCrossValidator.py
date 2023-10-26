@@ -63,4 +63,5 @@ class CustomCrossValidator(BaseCrossValidator):
     def split(self, x=None, y=None, groups=None):
         groups = self.split_data(x, y)
         for X_train, y_train in zip(groups[0], groups[1]):
-            yield np.arange(len(X_train)), np.arange(len(y_train))
+            if len(y_train):
+                yield np.arange(len(X_train)), np.arange(len(y_train))
