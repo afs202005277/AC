@@ -623,6 +623,19 @@ def simulate_games(teams, model, features):
 
     return res_df
 
+def data_profiling():
+    from ydata_profiling import ProfileReport
+    import os
+
+    dataframes_dict = initial_data_load()
+
+    if not os.path.exists("data_reports"):
+        os.makedirs("data_reports")
+
+    for name, df in dataframes_dict.items():
+        profile = ProfileReport(df, title="Profiling Report")
+        profile.to_file(os.path.join("data_reports", f"{name}.html"))
+
 def main():
     # Load data from CSVs
     dataframes_dict = initial_data_load()
@@ -661,7 +674,7 @@ def main():
                 range(1, lag_years_players + 1)] + ['year']
     target = 'EFF'
     trained_models_players = models_train_and_test_players(dataframes_dict['players_teams'], features, target)
-    eff_model = trained_models_players['Lasso Regression']
+    eff_model = trained_models_players['Random Forest Regressor']
     dataframes_dict['players_teams'] = models_predict_future_players(dataframes_dict['players_teams'], features,
                                                                      features_to_be_lagged,
                                                                      eff_model,
@@ -671,7 +684,7 @@ def main():
     target = 'DPR'
 
     trained_models_players = models_train_and_test_players_dpr(dataframes_dict['players_teams'], features, target)
-    dpr_model = trained_models_players['Lasso Regression']
+    dpr_model = trained_models_players['Random Forest Regressor']
 
     dataframes_dict['players_teams'] = models_predict_future_players_dpr(dataframes_dict['players_teams'], features,
                                                                          features_to_be_lagged,
