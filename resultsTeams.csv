@@ -1,2 +1,0 @@
-Model,Scaler,Best Parameters,Best Score,Mean Absolute Error,Mean Squared Error,Root Mean Squared Error,R-squared,Accuracy,Recall,Precision,F1 Score
-Ensemble Classifier,None,{'voting': 'hard'},0.8728240500239001,,,,,0.38461538461538464,0.5,0.5,0.5

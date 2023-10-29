@@ -1,13 +1,16 @@
+import time
+
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
 import models
 
-FAST = True
+FAST = False
 MODEL_PLAYERS_EFF = "Random Forest Regressor"
 MODEL_PLAYERS_DPR = "Random Forest Regressor"
 MODEL_TEAMS = "Linear SVC"
 MODEL_GAMES_SIM = "Random Forest Regressor"
+
 
 def progress(row):
     if pd.isnull(row['firstRound']):
@@ -523,6 +526,7 @@ def turn_series_post_into_no_bias(series_post):
 
     return series_post
 
+
 def merge_teams(series_post, teams):
     # Merge for team1 using suffix '_team1'
     merged_team1 = pd.merge(series_post, teams, left_on=['year', 'team1'], right_on=['year', 'tmID'], how='inner')
@@ -530,9 +534,11 @@ def merge_teams(series_post, teams):
     # Merge for team2 using suffix '_team2'
     merged_team2 = pd.merge(series_post, teams, left_on=['year', 'team2'], right_on=['year', 'tmID'], how='inner')
 
-    series_post = pd.merge(merged_team1, merged_team2, on=['year', 'team1', 'team2'], how='inner', suffixes=('_team1', '_team2'))
+    series_post = pd.merge(merged_team1, merged_team2, on=['year', 'team1', 'team2'], how='inner',
+                           suffixes=('_team1', '_team2'))
 
     return series_post
+
 
 def models_train_and_test_games(series_post, features, target):
     print("Models Running - Games Simulation")
@@ -560,6 +566,7 @@ def models_train_and_test_games(series_post, features, target):
 
     return trained_models
 
+
 def simulate_games(teams, model, features):
     columns = features.copy()
     for feature in features:
@@ -569,7 +576,7 @@ def simulate_games(teams, model, features):
 
     res_df = pd.DataFrame(columns=['year', 'team', 'teamWins'])
 
-    for most_recent_year in range(1, teams['year'].max()+1):
+    for most_recent_year in range(1, teams['year'].max() + 1):
 
         filtered_teams = teams.loc[teams['year'] == most_recent_year, ['tmID'] + features]
 
@@ -606,7 +613,6 @@ def simulate_games(teams, model, features):
         prepared_db = pd.concat(prepared_data, ignore_index=True)
         prepared_db.dropna(inplace=True)
 
-
         y_pred = model.predict(prepared_db[columns])
         prepared_db['team1Wins'] = y_pred
         prepared_db['team2Wins'] = 1 - prepared_db['team1Wins']
@@ -626,6 +632,7 @@ def simulate_games(teams, model, features):
 
     return res_df
 
+
 def data_profiling():
     from ydata_profiling import ProfileReport
     import os
@@ -639,7 +646,9 @@ def data_profiling():
         profile = ProfileReport(df, title="Profiling Report")
         profile.to_file(os.path.join("data_reports", f"{name}.html"))
 
+
 def main():
+    start = time.time()
     # Load data from CSVs
     dataframes_dict = initial_data_load()
 
@@ -716,10 +725,10 @@ def main():
 
     dataframes_dict['series_post'] = merge_teams(dataframes_dict['series_post'], dataframes_dict['teams'])
 
-
     # Select relevant features including lagged features
     features_games = [f'{feat}_Lag_{year}_{team}' for feat in features_to_be_lagged for year in
-                range(1, lag_years_teams + 1) for team in ['team1', 'team2']] + ['year'] + ['PredictedTeamScore' + team for team in ['_team1', '_team2']]
+                      range(1, lag_years_teams + 1) for team in ['team1', 'team2']] + ['year'] + [
+                         'PredictedTeamScore' + team for team in ['_team1', '_team2']]
     target = 'team1wins_team1'
     trained_models_for_games = models_train_and_test_games(dataframes_dict['series_post'], features_games, target)
 
@@ -742,14 +751,14 @@ def main():
     print("PREDICT NUMBER OF GAMES WON BY EACH TEAM")
 
     games_to_be_won = simulate_games(dataframes_dict['teams'],
-                                       trained_models_for_games[MODEL_GAMES_SIM],
-                                       features_games)
+                                     trained_models_for_games[MODEL_GAMES_SIM],
+                                     features_games)
 
     print(games_to_be_won.sort_values(by=['year', 'teamWins'], ascending=False).head(len(team_map)))
 
     games_to_be_won = games_to_be_won.merge(dataframes_dict['teams'][['year', 'tmID', 'playoff_x']],
-                                      left_on=['team', 'year'],
-                                      right_on=['tmID', 'year'], how='left')
+                                            left_on=['team', 'year'],
+                                            right_on=['tmID', 'year'], how='left')
 
     games_to_be_won.dropna(inplace=True)
 
@@ -778,16 +787,18 @@ def main():
     print("Game Simulation (Metrics):\n")
 
     accuracy = accuracy_score(y_test, y_pred)
-    print(f"Accuracy: {accuracy*100.0}%")
+    print(f"Accuracy: {accuracy * 100.0}%")
     precision = precision_score(y_test, y_pred, pos_label='Y')
-    print(f"Precision: {precision*100.0}%")
+    print(f"Precision: {precision * 100.0}%")
     recall = recall_score(y_test, y_pred, pos_label='Y')
-    print(f"Recall: {recall*100.0}%")
+    print(f"Recall: {recall * 100.0}%")
     f1 = f1_score(y_test, y_pred, pos_label='Y')
-    print(f"F1 Score: {f1*100.0}%")
+    print(f"F1 Score: {f1 * 100.0}%")
     conf_matrix = confusion_matrix(y_test, y_pred)
     print("Confusion Matrix")
     print(conf_matrix)
+    end = time.time()
+    print("Elapsed time: " + str(end - start))
 
 
 main()

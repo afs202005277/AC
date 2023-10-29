@@ -1,0 +1,43 @@
+Model,Scaler,Best Parameters,Best Score,Mean Absolute Error,Mean Squared Error,Root Mean Squared Error,R-squared
+Linear Regression,None,"{'copy_X': True, 'fit_intercept': True}",0.48709601149498283,237.27568700136237,88285.31196388953,297.1284435456988,0.592912328618765
+Random Forest Regressor,None,"{'max_depth': 30, 'min_samples_leaf': 1, 'min_samples_split': 2, 'n_estimators': 200}",0.6936312146218258,245.12755704173074,93503.27021476858,305.7830443546021,0.5688520809233876
+Gradient Boosting Regressor,None,"{'learning_rate': 0.2, 'max_depth': 5, 'n_estimators': 200}",0.7334977179998711,262.2075732816319,108212.93362281524,328.95734316597225,0.5010251401743677
+Support Vector Regressor,None,"{'C': 1000, 'coef0': 0, 'degree': 2, 'gamma': 'auto', 'kernel': 'rbf', 'max_iter': 25000, 'shrinking': True, 'tol': 0.001}",0.7102393359863303,367.8765827470527,212604.5741117137,461.09063546304395,0.019670440361168162
+Ridge Regression,None,{'alpha': 0.1},0.4870958251709902,237.27907785686298,88283.021050458,297.1245884312808,0.5929228921269345
+Lasso Regression,None,"{'alpha': 0.1, 'max_iter': 5000, 'tol': 0.0001}",0.4870680235531055,237.4172606315581,88278.44236722687,297.1168833426113,0.5929440046478407
+MLP Regressor,None,"{'activation': 'relu', 'alpha': 0.01, 'early_stopping': False, 'hidden_layer_sizes': (100, 100), 'learning_rate': 'constant', 'max_iter': 600, 'solver': 'adam'}",0.5273292131516162,253.453391164571,99170.74864482143,314.9138749639676,0.5427190748165817
+Linear Regression,StandardScaler,"{'copy_X': True, 'fit_intercept': True}",0.48709601149498283,237.27568700136246,88285.31196388978,297.1284435456992,0.5929123286187639
+Random Forest Regressor,StandardScaler,"{'max_depth': 30, 'min_samples_leaf': 1, 'min_samples_split': 2, 'n_estimators': 200}",0.6935272191895727,247.5279239561602,94576.0532989897,307.53219880036903,0.5639054283269581
+Gradient Boosting Regressor,StandardScaler,"{'learning_rate': 0.2, 'max_depth': 5, 'n_estimators': 200}",0.7334977179998711,261.9777806399961,110560.10967574897,332.50580397302684,0.4902022024460464
+Support Vector Regressor,StandardScaler,"{'C': 1000, 'coef0': 2, 'degree': 5, 'gamma': 'scale', 'kernel': 'poly', 'max_iter': 25000, 'shrinking': False, 'tol': 0.001}",0.5866111263981851,407.76122090705337,357504.24928853015,597.9165905780924,-0.6484686876486458
+Ridge Regression,StandardScaler,{'alpha': 0.1},0.4870402537698222,237.33079666213123,88274.12847147572,297.10962366014957,0.5929638962213863
+Lasso Regression,StandardScaler,"{'alpha': 0.1, 'max_iter': 5000, 'tol': 0.0001}",0.48660399745862215,237.73938067317278,88020.58032610739,296.6826255885359,0.5941330184885563
+MLP Regressor,StandardScaler,"{'activation': 'logistic', 'alpha': 0.001, 'early_stopping': False, 'hidden_layer_sizes': (100,), 'learning_rate': 'adaptive', 'max_iter': 600, 'solver': 'sgd'}",0.5768126193773176,244.99212861451423,92455.3043454871,304.064638433158,0.5736843001897963
+Linear Regression,MinMaxScaler,"{'copy_X': True, 'fit_intercept': True}",0.48709601149498283,237.2756870013625,88285.31196388957,297.1284435456989,0.5929123286187649
+Random Forest Regressor,MinMaxScaler,"{'max_depth': 30, 'min_samples_leaf': 1, 'min_samples_split': 2, 'n_estimators': 200}",0.6937253227717415,245.2422915370387,92914.06627075972,304.818087177844,0.5715689276581345
+Gradient Boosting Regressor,MinMaxScaler,"{'learning_rate': 0.2, 'max_depth': 5, 'n_estimators': 200}",0.7334977179998711,264.9226303937255,111128.35026839744,333.3591910663293,0.48758201869747253
+Support Vector Regressor,MinMaxScaler,"{'C': 1000, 'coef0': 1, 'degree': 5, 'gamma': 'scale', 'kernel': 'poly', 'max_iter': 25000, 'shrinking': False, 'tol': 0.001}",0.5725990012128817,363.6793569783887,266036.59145020536,515.7873509986507,-0.22670707172629156
+Ridge Regression,MinMaxScaler,{'alpha': 0.1},0.4849926464578298,237.93754492244312,87975.82613431396,296.60719164294375,0.5943393821442591
+Lasso Regression,MinMaxScaler,"{'alpha': 0.1, 'max_iter': 5000, 'tol': 1e-05}",0.4837524764584682,236.93309783577044,86892.96397951379,294.7761251857311,0.599332509802966
+MLP Regressor,MinMaxScaler,"{'activation': 'logistic', 'alpha': 0.01, 'early_stopping': False, 'hidden_layer_sizes': (100,), 'learning_rate': 'adaptive', 'max_iter': 600, 'solver': 'sgd'}",0.5588810535473674,245.97552543736413,99091.8356376795,314.7885570310323,0.543082946355397
+Linear Regression,RobustScaler,"{'copy_X': True, 'fit_intercept': True}",0.48709601149498283,237.27568700136274,88285.31196389052,297.12844354570046,0.5929123286187605
+Random Forest Regressor,RobustScaler,"{'max_depth': None, 'min_samples_leaf': 1, 'min_samples_split': 2, 'n_estimators': 200}",0.693585701489065,246.68378329092636,94514.66823932456,307.43237994610223,0.564188477686368
+Gradient Boosting Regressor,RobustScaler,"{'learning_rate': 0.2, 'max_depth': 5, 'n_estimators': 200}",0.7334977179998711,262.1910263419157,110625.80199240982,332.60457301788534,0.4898992921247005
+Support Vector Regressor,RobustScaler,"{'C': 1000, 'coef0': 0, 'degree': 2, 'gamma': 'auto', 'kernel': 'rbf', 'max_iter': 25000, 'shrinking': True, 'tol': 0.001}",0.540442176166201,327.9422673571199,166407.98815019926,407.9313522520661,0.23268504252430056
+Ridge Regression,RobustScaler,{'alpha': 0.1},0.4870587729444223,237.35979497824687,88322.15974091757,297.1904435558411,0.5927424218085353
+Lasso Regression,RobustScaler,"{'alpha': 0.1, 'max_iter': 5000, 'tol': 0.0001}",0.4869254096975492,237.66709439147488,88379.20624531744,297.2864044071263,0.5924793777288351
+MLP Regressor,RobustScaler,"{'activation': 'relu', 'alpha': 0.001, 'early_stopping': False, 'hidden_layer_sizes': (100, 100), 'learning_rate': 'adaptive', 'max_iter': 400, 'solver': 'adam'}",0.4609637801718042,263.1996477727269,111771.26673953592,334.322100285841,0.484617501006971
+Linear Regression,MaxAbsScaler,"{'copy_X': True, 'fit_intercept': True}",0.48709601149498283,237.27568700136226,88285.31196388946,297.1284435456987,0.5929123286187654
+Random Forest Regressor,MaxAbsScaler,"{'max_depth': 30, 'min_samples_leaf': 1, 'min_samples_split': 2, 'n_estimators': 200}",0.6937804700181261,247.97638472748835,94079.77659435413,306.7242680231777,0.5661937832475761
+Gradient Boosting Regressor,MaxAbsScaler,"{'learning_rate': 0.2, 'max_depth': 5, 'n_estimators': 200}",0.7334977179998711,265.92196807052517,112034.31266309645,334.71527103360023,0.4834045840437009
+Support Vector Regressor,MaxAbsScaler,"{'C': 1000, 'coef0': 1, 'degree': 5, 'gamma': 'scale', 'kernel': 'poly', 'max_iter': 25000, 'shrinking': False, 'tol': 0.001}",0.5753204912325866,398.2821608261221,318761.6930355449,564.5898449631776,-0.4698249624632471
+Ridge Regression,MaxAbsScaler,{'alpha': 0.1},0.4849735928602824,237.94343987381012,87983.99735231287,296.6209658003171,0.5943017042787848
+Lasso Regression,MaxAbsScaler,"{'alpha': 0.1, 'max_iter': 5000, 'tol': 1e-05}",0.4837514084435574,236.93839384069528,86899.52350351289,294.7872512567545,0.5993022635333345
+MLP Regressor,MaxAbsScaler,"{'activation': 'logistic', 'alpha': 0.0001, 'early_stopping': False, 'hidden_layer_sizes': (100,), 'learning_rate': 'adaptive', 'max_iter': 600, 'solver': 'sgd'}",0.5456651909189432,243.93097579848938,94444.79020901337,307.31871112741146,0.5645106885276427
+Linear Regression,Normalizer,"{'copy_X': True, 'fit_intercept': True}",0.3992487909420811,278.0911536876906,110837.96935183159,332.92336858777514,0.4889209785822911
+Random Forest Regressor,Normalizer,"{'max_depth': None, 'min_samples_leaf': 1, 'min_samples_split': 2, 'n_estimators': 200}",0.6902413883075443,248.6249030909058,95089.09915410407,308.36520418831964,0.5615397500751134
+Gradient Boosting Regressor,Normalizer,"{'learning_rate': 0.2, 'max_depth': 5, 'n_estimators': 200}",0.7335161429197247,264.8775473958359,113304.62634771202,336.6075256849021,0.4775471086801276
+Support Vector Regressor,Normalizer,"{'C': 1000, 'coef0': 3, 'degree': 5, 'gamma': 'scale', 'kernel': 'poly', 'max_iter': 25000, 'shrinking': False, 'tol': 0.001}",0.46743955798833253,317.3162135326239,148301.98862763337,385.09997225088625,0.31617264674419476
+Ridge Regression,Normalizer,{'alpha': 0.1},0.3358448350299728,294.38703562418243,121539.78383528799,348.6255639440229,0.43957441525580965
+Lasso Regression,Normalizer,"{'alpha': 0.1, 'max_iter': 5000, 'tol': 1e-06}",0.3443536074628157,298.8300271528157,123643.53895703096,351.6298322910486,0.42987390274001336
+MLP Regressor,Normalizer,"{'activation': 'relu', 'alpha': 0.01, 'early_stopping': False, 'hidden_layer_sizes': (50, 50, 100), 'learning_rate': 'adaptive', 'max_iter': 600, 'solver': 'adam'}",0.45611228416544497,245.13963229690134,93523.12776002682,305.81551262162424,0.5687605168604795
