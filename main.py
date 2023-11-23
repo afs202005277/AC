@@ -1,5 +1,6 @@
 import time
 
+import joblib
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder, RobustScaler
@@ -600,6 +601,81 @@ def data_profiling():
     for name, df in dataframes_dict.items():
         profile = ProfileReport(df, title="Profiling Report")
         profile.to_file(os.path.join("data_reports", f"{name}.html"))
+
+
+def eleventh_year_data_load():
+    print("Predict Data Load")
+    players_teams = pd.read_csv('./Season 11/players_teams.csv')
+    coaches = pd.read_csv('./Season 11/coaches.csv')
+    teams = pd.read_csv('./Season 11/teams.csv')
+
+    dataframes_dict = {
+        'coaches': coaches,
+        'players_teams': players_teams,
+        'teams': teams,
+    }
+
+    return dataframes_dict
+
+def merge_dataframes(df1, df2):
+    for k in df1.keys():
+        if k in df2:
+            df1[k] = pd.concat([df1[k], df2[k]])
+
+    for k in df2.keys():
+        if k not in df1:
+            df1[k] = df2[k]
+
+    return df1
+
+def predict_11th_year():
+    # Load data from CSVs
+    dataframes_dict = initial_data_load()
+    predict_year_dict = eleventh_year_data_load()
+
+    complete_dataframe_dict = merge_dataframes(dataframes_dict, predict_year_dict)
+    dataframes_dict = complete_dataframe_dict
+
+    # Cleanup data on players dataframe
+    dataframes_dict['players'] = player_data_cleanup(dataframes_dict['players'])
+
+    # Add number of awards to players dataframe
+    dataframes_dict['players'] = merge_players_awards(dataframes_dict['players'], dataframes_dict['awards_players'])
+
+    # Add EFF, DPR, FG%, FT%, PPG features to players_teams dataframe
+    dataframes_dict['players_teams'] = feature_creation_players_teams(dataframes_dict['players_teams'])
+
+    # Merge players_teams with players
+    dataframes_dict['players_teams'] = merge_players_teams(dataframes_dict['players_teams'], dataframes_dict['players'])
+
+    # creating new features to help predict the EFF for the next year:
+
+    # Mapping teams to indexes
+    team_map = team_mapping(list(dataframes_dict['teams']['tmID'].unique()))
+
+    lag_years_players = 7
+    features_to_be_lagged = ['FG_Percentage', 'FT_Percentage', 'PPG', 'EFF', 'DPR']
+    dataframes_dict['players_teams'] = create_lagged_features_players(dataframes_dict['players_teams'],
+                                                                      features_to_be_lagged, lag_years_players)
+
+    # Select relevant features including lagged features
+    features = [f'{feat}_Lag_{year}' for feat in features_to_be_lagged for year in
+                range(1, lag_years_players + 1)] + ['year']
+    target = 'EFF'
+    name_file = MODEL_PLAYERS_EFF.replace(' ', '').split('_')
+    name_file.insert(1, 'Players')
+    name_file.append('EFF')
+    eff_model = joblib.load('models/' + '_'.join(name_file) + '.joblib')
+
+    dataframes_dict['players_teams'] = models_predict_future_players(dataframes_dict['players_teams'], features,
+                                                                     features_to_be_lagged,
+                                                                     eff_model,
+                                                                     lag_years_players, 'Predicted_EFF')
+    features.append('Predicted_EFF')
+    features.append('year')
+
+    print("pls get here")
+
 
 
 def main():
