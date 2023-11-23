@@ -130,7 +130,7 @@ def merge_players_awards(players, awards_players):
     return players
 
 
-def feature_creation_players_teams(players_teams):
+def feature_creation_players_teams(players_teams, predicting=False):
     print("Feature Creation - Players Teams")
     # Creating Efficiency column of the players
     players_teams['EFF'] = (players_teams['points'] + players_teams['rebounds'] + players_teams['assists'] +
@@ -150,7 +150,8 @@ def feature_creation_players_teams(players_teams):
     players_teams['PPG'] = players_teams['points'] / players_teams['GP']
 
     # Remove rows with missing values in FGP, FTP, and PPG
-    players_teams.dropna(subset=['FG_Percentage', 'FT_Percentage', 'PPG'], inplace=True)
+    if not predicting:
+        players_teams.dropna(subset=['FG_Percentage', 'FT_Percentage', 'PPG'], inplace=True)
 
     return players_teams
 
@@ -158,7 +159,7 @@ def feature_creation_players_teams(players_teams):
 def merge_players_teams(players_teams, players):
     print("Merge Player Teams")
     players_teams = pd.merge(players_teams, players, left_on='playerID', right_on='bioID',
-                             how='inner').drop_duplicates()
+                             how='outer').drop_duplicates()
 
     return players_teams
 
@@ -290,6 +291,7 @@ def models_predict_future_players(players_teams, features, features_to_be_lagged
     future_player_data.reset_index(drop=True, inplace=True)
 
     future_player_data = create_lagged_features_players(future_player_data, features_to_be_lagged, lag_years)
+
 
     # Use the trained model to predict EFF for the next year
     future_predictions = model.predict(scale_data(RobustScaler(), future_player_data[features]))
@@ -643,15 +645,12 @@ def predict_11th_year():
     dataframes_dict['players'] = merge_players_awards(dataframes_dict['players'], dataframes_dict['awards_players'])
 
     # Add EFF, DPR, FG%, FT%, PPG features to players_teams dataframe
-    dataframes_dict['players_teams'] = feature_creation_players_teams(dataframes_dict['players_teams'])
+    dataframes_dict['players_teams'] = feature_creation_players_teams(dataframes_dict['players_teams'], predicting=True)
 
     # Merge players_teams with players
     dataframes_dict['players_teams'] = merge_players_teams(dataframes_dict['players_teams'], dataframes_dict['players'])
 
     # creating new features to help predict the EFF for the next year:
-
-    # Mapping teams to indexes
-    team_map = team_mapping(list(dataframes_dict['teams']['tmID'].unique()))
 
     lag_years_players = 7
     features_to_be_lagged = ['FG_Percentage', 'FT_Percentage', 'PPG', 'EFF', 'DPR']
@@ -660,21 +659,64 @@ def predict_11th_year():
 
     # Select relevant features including lagged features
     features = [f'{feat}_Lag_{year}' for feat in features_to_be_lagged for year in
-                range(1, lag_years_players + 1)] + ['year']
-    target = 'EFF'
+                range(1, lag_years_players + 1)]
     name_file = MODEL_PLAYERS_EFF.replace(' ', '').split('_')
     name_file.insert(1, 'Players')
     name_file.append('EFF')
-    eff_model = joblib.load('models/' + '_'.join(name_file) + '.joblib')
+    name_file = '_'.join(name_file)
+    eff_model = joblib.load('models/' + name_file + '.joblib')
 
-    dataframes_dict['players_teams'] = models_predict_future_players(dataframes_dict['players_teams'], features,
-                                                                     features_to_be_lagged,
-                                                                     eff_model,
-                                                                     lag_years_players, 'Predicted_EFF')
-    features.append('Predicted_EFF')
-    features.append('year')
+    # transforming player_teams to just year 11
+    player_teams = dataframes_dict['players_teams']
+    results = eff_model.predict(player_teams[features])
+    player_teams['Predicted_EFF'] = results
 
-    print("pls get here")
+    # dpr
+
+    name_file = MODEL_PLAYERS_DPR.replace(' ', '').split('_')
+    name_file.insert(1, 'Players')
+    name_file.append('EFF')
+    name_file = '_'.join(name_file)
+    dpr_model = joblib.load('models/' + name_file + '.joblib')
+    results = dpr_model.predict(player_teams[features])
+    player_teams['Predicted_DPR'] = results
+
+    dataframes_dict['players_teams'] = player_teams
+
+    # teams
+
+    # Mapping teams to indexes
+    team_map = team_mapping(list(dataframes_dict['players_teams']['tmID'].unique()))
+
+    dataframes_dict['coaches'] = feature_creation_coaches(dataframes_dict['coaches'])
+    dataframes_dict['coaches'] = coaches_data_cleanup(dataframes_dict['coaches'])
+
+    dataframes_dict['teams'] = merge_coaches(dataframes_dict['teams'], dataframes_dict['coaches'])
+    dataframes_dict['teams'] = feature_creation_teams(dataframes_dict['teams'], dataframes_dict['players_teams'])
+    dataframes_dict['teams'] = teams_data_cleanup(dataframes_dict['teams'], team_map)
+
+    lag_years_teams = 3
+    features_to_be_lagged = ['RealTeamScore', 'defensive_performance', 'offensive_performance', 'gamesWLRatio',
+                             'homeWLRatio', 'awayWLRatio', 'confWLRatio', 'progress', 'playoff']
+    dataframes_dict['teams'] = create_lagged_features_teams(dataframes_dict['teams'],
+                                                            features_to_be_lagged, lag_years_teams)
+
+    # Select relevant features including lagged features
+    features = [f'{feat}_Lag_{year}' for feat in features_to_be_lagged for year in
+                range(1, lag_years_teams + 1)] + ['PredictedTeamScore']
+
+    name_file = MODEL_TEAMS.replace(' ', '').split('_')
+    name_file.insert(1, 'Teams')
+    name_file.append('playoff')
+    name_file = '_'.join(name_file)
+    playoff_model = joblib.load('models/' + name_file + '.joblib')
+    results = playoff_model.predict(dataframes_dict['teams'][features])
+    dataframes_dict['teams']['Predicted_Playoff'] = results
+
+    dataframes_dict['teams'] = dataframes_dict['teams'].sort_values(by='Predicted_Playoff', ascending=False)
+    reverse_team_map = {value: key for key, value in team_map.items()}
+    dataframes_dict['teams']['tmID'] = dataframes_dict['teams']['tmID'].replace(reverse_team_map)
+    print(dataframes_dict['teams'][dataframes_dict['teams']['year'] == 11].head(len(team_map)))
 
 
 
@@ -825,4 +867,4 @@ def main():
     print("Elapsed time: " + str(end - start))
 
 
-main()
+predict_11th_year()
