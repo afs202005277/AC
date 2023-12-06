@@ -79,6 +79,10 @@ slow_regression_models = [
         }
     }
 ]
+"""
+A list of slow regression models along with their associated hyperparameter search spaces.
+Each model is represented as a dictionary containing the model's name, the model instance, and a dictionary of hyperparameter values to be explored.
+"""
 
 slow_classifier_models = [
     {
@@ -131,6 +135,10 @@ slow_classifier_models = [
         'params': {'voting': ['hard', 'soft']}
     }
 ]
+"""
+A list of slow classifier models along with their associated hyperparameter search spaces.
+Each model is represented as a dictionary containing the model's name, the model instance, and a dictionary of hyperparameter values to be explored.
+"""
 
 fast_regression_models = [
     {
@@ -146,6 +154,10 @@ fast_regression_models = [
                    'max_iter': [1000, 2000, 25000]}
     }
 ]
+"""
+A list of fast regression models along with their associated hyperparameter search spaces.
+Each model is represented as a dictionary containing the model's name, the model instance, and a dictionary of hyperparameter values to be explored.
+"""
 
 fast_classifier_models = [
     {
@@ -155,17 +167,46 @@ fast_classifier_models = [
                    'penalty': ['l1', 'l2']}
     }
 ]
+"""
+A list of fast classifier models along with their associated hyperparameter search spaces.
+Each model is represented as a dictionary containing the model's name, the model instance, and a dictionary of hyperparameter values to be explored.
+"""
 
 scalers = {'None': None, 'StandardScaler': StandardScaler(), 'MinMaxScaler': MinMaxScaler(),
            'RobustScaler': RobustScaler(), 'MaxAbsScaler': MaxAbsScaler(), 'Normalizer': Normalizer()}
+"""
+A dictionary containing different scalers and their corresponding instances.
+Scalers are used for preprocessing input data before feeding it into machine learning models.
+"""
 
 
 def build_file_name(model_name, name, target_col, scaler_name):
+    """
+        Build a standardized file name for saving a machine learning model.
+
+        Parameters:
+        model_name (str): The name of the machine learning model.
+        name (str): The identifier for the specific use or purpose of the model.
+        target_col (str): The target column or variable that the model predicts.
+        scaler_name (str): The name of the scaler used for preprocessing input data.
+
+        Returns:
+        str: The constructed file name for saving the model.
+        """
     file_name = model_name.replace(" ", "") + '_' + name + '_' + target_col + '_' + scaler_name + ".joblib"
     return os.path.join("models", file_name)
 
 
 def save_models(trained_models, name, target_col):
+    """
+        Save trained machine learning models to files.
+
+        Parameters:
+        trained_models (dict): A dictionary containing trained models along with their names and scalers.
+                              Keys are tuples (model_name, scaler_name), and values are the corresponding models.
+        name (str): The identifier for the specific use or purpose of the models.
+        target_col (str): The target column or variable that the models predict.
+        """
     if not os.path.exists("models"):
         os.makedirs("models")
 
@@ -177,6 +218,17 @@ def save_models(trained_models, name, target_col):
 
 
 def scale_dataframe(scaler, x_train, x_test):
+    """
+        Scale the features of a DataFrame using a specified scaler.
+
+        Parameters:
+        scaler: An instance of a scaler from scikit-learn or None if no scaling is needed.
+        x_train (pd.DataFrame): The training features DataFrame.
+        x_test (pd.DataFrame): The testing features DataFrame.
+
+        Returns:
+        pd.DataFrame, pd.DataFrame: Scaled training and testing features DataFrames.
+        """
     columns = x_train.columns
     if scaler is not None:
         x_train = scaler.fit_transform(x_train)
@@ -189,6 +241,23 @@ def scale_dataframe(scaler, x_train, x_test):
 
 def run_all(x_train_original, y_train_original, x_test_original, y_test_original, min_years, max_years, target_column,
             name, fast):
+    """
+       Run a comprehensive machine learning analysis including training, testing, and evaluation of models.
+
+       Args:
+       x_train_original (pd.DataFrame): The original training features DataFrame.
+       y_train_original (pd.Series): The original training target variable.
+       x_test_original (pd.DataFrame): The original testing features DataFrame.
+       y_test_original (pd.Series): The original testing target variable.
+       min_years (int): The minimum year for cross-validation.
+       max_years (int): The maximum year for cross-validation.
+       target_column (str): The target column or variable that the models predict.
+       name (str): The identifier for the specific use or purpose of the models.
+       fast (bool): Flag indicating whether to use fast or slow models.
+
+       Returns:
+       dict: A dictionary containing trained machine learning models.
+       """
     global scalers
     results = []
     trained_models = {}

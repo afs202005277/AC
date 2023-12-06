@@ -4,6 +4,19 @@ from sklearn.model_selection import BaseCrossValidator
 
 
 class CustomCrossValidator(BaseCrossValidator):
+    """
+        Custom cross-validator for time-series data.
+
+        Parameters:
+        min_years (int): The minimum number of years in each fold.
+        max_years (int): The maximum number of years in each fold.
+        target_column (str): The target column or variable in the dataset.
+
+        Methods:
+        - get_n_splits(x=None, y=None, groups=None): Get the number of splits.
+        - split_data(x_train, y_train): Split the data into training and testing sets based on a sliding window.
+        - split(x=None, y=None, groups=None): Generate indices to split data into training and test set.
+        """
 
     def __init__(self, min_years, max_years, target_column):
         self.min_years = min_years
@@ -11,10 +24,26 @@ class CustomCrossValidator(BaseCrossValidator):
         self.target_column = target_column
 
     def get_n_splits(self, x=None, y=None, groups=None):
+        """
+            Get the number of splits.
+
+            Returns:
+            int: The number of splits.
+            """
         t1, t2 = self.split_data(x, y)
         return len(t1)
 
     def split_data(self, x_train, y_train):
+        """
+            Split the data into training and testing sets based on a sliding window.
+
+            Args:
+            x_train (pd.DataFrame): The training features DataFrame.
+            y_train (pd.Series): The training target variable.
+
+            Returns:
+            tuple: Lists containing training and testing sets.
+            """
         dataset = pd.concat([x_train, y_train], axis=1)
         years = dataset['year'].unique()
         x_train_list, x_test_list, y_train_list, y_test_list = [], [], [], []
@@ -50,6 +79,16 @@ class CustomCrossValidator(BaseCrossValidator):
         return x_train_list, y_train_list
 
     def split(self, x=None, y=None, groups=None):
+        """
+            Generate indices to split data into training and test set.
+
+            Args:
+            x (array-like): The input data.
+            y (array-like): The target variable.
+
+            Yields:
+            tuple: Indices of training and testing sets.
+            """
         groups = self.split_data(x, y)
         for X_train, y_train in zip(groups[0], groups[1]):
             yield np.arange(len(X_train)), np.arange(len(y_train))

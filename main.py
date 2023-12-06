@@ -6,14 +6,50 @@ import numpy as np
 from sklearn.preprocessing import LabelEncoder, RobustScaler
 import models
 
-FAST = False
+FAST = True
+"""
+Flag indicating whether to run the program in fast mode.
+If True, the script will test a smaller number of machine learning models.
+Also, for performance improvement, the program persists trained models in local file system ("models" folder).
+
+"""
+
 MODEL_PLAYERS_EFF = "Random Forest Regressor_RobustScaler"
+"""
+Model name for predicting player Efficiency (EFF).
+"""
 MODEL_PLAYERS_DPR = "Random Forest Regressor_RobustScaler"
+"""
+Model name for predicting player Defensive Performance Rating (DPR).
+"""
 MODEL_TEAMS = "Lasso Regression_None"
+"""
+Model name for predicting team qualification to the playoffs.
+"""
 MODEL_GAMES_SIM = "Random Forest Regressor_RobustScaler"
+"""
+Model name for simulating game outcomes.
+"""
 
 
 def progress(row):
+    """
+        Calculate the playoff progress based on the provided row.
+
+        This function assigns a progress value based on the team's performance in the playoffs.
+        The progress is calculated as follows:
+        - 0 for teams not in the playoffs
+        - 0.5 for teams eliminated in the first round
+        - 1.5 for teams reaching the conference semifinals
+        - 2.5 for teams reaching the finals
+        - 3 for teams winning the championship
+
+        Parameters:
+        row (pandas.Series): A row of data containing playoff information.
+
+        Returns:
+        float: The calculated playoff progress value.
+        """
     if pd.isnull(row['firstRound']):
         return 0
     elif row['firstRound'] == 'L':
@@ -27,6 +63,16 @@ def progress(row):
 
 
 def find_and_move_max_year_records(players_teams):
+    """
+        Separates records corresponding to the maximum year in the dataset and moves them to a separate DataFrame.
+
+        Parameters:
+        - players_teams (pd.DataFrame): The input DataFrame containing player-team records.
+
+        Returns:
+        - max_year_df (pd.DataFrame): DataFrame containing records for the maximum year.
+        - players_teams (pd.DataFrame): DataFrame with records excluding those for the maximum year.
+        """
     players_teams = players_teams.copy()
     max_year = players_teams['year'].max()
     max_year_records = players_teams[players_teams['year'] == max_year]
@@ -39,6 +85,12 @@ def find_and_move_max_year_records(players_teams):
 
 
 def initial_data_load():
+    """
+        Loads initial data from CSV files into separate DataFrames and returns a dictionary of DataFrames.
+
+        Returns:
+        - dataframes_dict (dict): A dictionary containing DataFrames for different datasets.
+        """
     print("Initial Data Load")
     awards_players = pd.read_csv('./basketballPlayoffs/awards_players.csv')
     coaches = pd.read_csv('./basketballPlayoffs/coaches.csv')
@@ -63,11 +115,20 @@ def initial_data_load():
 
 
 def player_data_cleanup(players):
+    """
+        Cleans up player data by performing various transformations and filtering irrelevant information.
+
+        Parameters:
+        - players (pd.DataFrame): DataFrame containing player data.
+
+        Returns:
+        - players (pd.DataFrame): Cleaned DataFrame with specified modifications.
+        """
     print("Player Data Cleanup")
     # Death Date is irrelevant for the way they play
     players.drop('deathDate', inplace=True, axis='columns')
 
-    # Removing NaN on pos
+    # Removing NaN on position
     players = players.dropna(subset=['pos'])
 
     # Removing players with 0000-00-00 as birthDates
@@ -95,6 +156,15 @@ def player_data_cleanup(players):
 
 
 def college_mapping(unique_colleges):
+    """
+        Creates a mapping dictionary for unique college names to numerical indices.
+
+        Parameters:
+        - unique_colleges (set): Set containing unique college names.
+
+        Returns:
+        - college_mapping_dict (dict): Mapping dictionary with college names as keys and corresponding indices as values.
+        """
     college_mapping_dict = {}
     for index, college in enumerate(unique_colleges):
         college_mapping_dict[college] = index
@@ -103,6 +173,15 @@ def college_mapping(unique_colleges):
 
 
 def team_mapping(unique_teams):
+    """
+        Creates a mapping dictionary for unique team names to numerical indices.
+
+        Parameters:
+        - unique_teams (set): Set containing unique team names.
+
+        Returns:
+        - team_mapping_dict (dict): Mapping dictionary with team names as keys and corresponding indices as values.
+        """
     team_mapping_dict = {}
     for index, team in enumerate(unique_teams):
         team_mapping_dict[team] = index
@@ -111,11 +190,30 @@ def team_mapping(unique_teams):
 
 
 def position_mapping(unique_pos):
+    """
+        Creates a mapping dictionary for unique player positions to numerical indices.
+
+        Parameters:
+        - unique_pos (set): Set containing unique player positions.
+
+        Returns:
+        - pos_mapping (dict): Mapping dictionary with player positions as keys and corresponding indices as values.
+        """
     pos_mapping = {pos: ind for ind, pos in enumerate(unique_pos)}
     return pos_mapping
 
 
 def merge_players_awards(players, awards_players):
+    """
+        Merges player data with awards data and calculates the number of awards for each player.
+
+        Parameters:
+        - players (pd.DataFrame): DataFrame containing player data.
+        - awards_players (pd.DataFrame): DataFrame containing awards data for players.
+
+        Returns:
+        - players (pd.DataFrame): DataFrame with merged data and a new column 'numAwards'.
+        """
     print("Merge Players Awards")
     merged_df = players.merge(awards_players, left_on='bioID', right_on='playerID', how='left')
     # Group by playerId and calculate the number of awards for each player
@@ -131,6 +229,17 @@ def merge_players_awards(players, awards_players):
 
 
 def feature_creation_players_teams(players_teams, predicting=False):
+    """
+        Creates additional features for player-team data, including Efficiency, Defense Score, FG Percentage,
+        FT Percentage, and Points Per Game.
+
+        Parameters:
+        - players_teams (pd.DataFrame): DataFrame containing player-team data.
+        - predicting (bool): Flag indicating whether the function is used for prediction (default is False).
+
+        Returns:
+        - players_teams (pd.DataFrame): DataFrame with added features.
+        """
     print("Feature Creation - Players Teams")
     # Creating Efficiency column of the players
     players_teams['EFF'] = (players_teams['points'] + players_teams['rebounds'] + players_teams['assists'] +
@@ -157,6 +266,16 @@ def feature_creation_players_teams(players_teams, predicting=False):
 
 
 def merge_players_teams(players_teams, players):
+    """
+        Merges player-team data with player data based on the 'playerID' and 'bioID' columns.
+
+        Parameters:
+        - players_teams (pd.DataFrame): DataFrame containing player-team data.
+        - players (pd.DataFrame): DataFrame containing player data.
+
+        Returns:
+        - players_teams (pd.DataFrame): DataFrame with merged data.
+        """
     print("Merge Player Teams")
     players_teams = pd.merge(players_teams, players, left_on='playerID', right_on='bioID',
                              how='outer').drop_duplicates()
@@ -165,6 +284,16 @@ def merge_players_teams(players_teams, players):
 
 
 def series_post_data_cleanup(series_post, team_mapping_dict):
+    """
+        Cleans up series post data by performing various transformations and encoding.
+
+        Parameters:
+        - series_post (pd.DataFrame): DataFrame containing series post data.
+        - team_mapping_dict (dict): Mapping dictionary for team names to numerical indices.
+
+        Returns:
+        - series_post (pd.DataFrame): Cleaned DataFrame with specified modifications.
+        """
     print("Series Post Data Cleanup")
     series_post.drop(['lgIDLoser', 'lgIDWinner'], inplace=True, axis='columns')
 
@@ -182,6 +311,17 @@ def series_post_data_cleanup(series_post, team_mapping_dict):
 
 
 def create_lagged_features_players(players_teams, features_to_be_lagged, lag_years):
+    """
+        Creates lagged features for specified columns in player-team data.
+
+        Parameters:
+        - players_teams (pd.DataFrame): DataFrame containing player-team data.
+        - features_to_be_lagged (list): List of column names for which lagged features are to be created.
+        - lag_years (int): Number of years to lag the features.
+
+        Returns:
+        - players_teams (pd.DataFrame): DataFrame with lagged features.
+        """
     print("Create Lagged Features Players")
     # Create lagged features
     for feat in features_to_be_lagged:
@@ -197,6 +337,17 @@ def create_lagged_features_players(players_teams, features_to_be_lagged, lag_yea
 
 
 def models_train_and_test_players_dpr(players_teams, features, target):
+    """
+        Trains and tests machine learning models on player-team data for predicting Defense Score (DPR).
+
+        Parameters:
+        - players_teams (pd.DataFrame): DataFrame containing player-team data.
+        - features (list): List of feature columns used for training the models.
+        - target (str): Target column to be predicted.
+
+        Returns:
+        - trained_models (dict): Dictionary containing trained machine learning models.
+        """
     print("Models Running - Players")
     players_teams = players_teams.copy()
     players_teams = players_teams.dropna()
@@ -214,6 +365,17 @@ def models_train_and_test_players_dpr(players_teams, features, target):
 
 
 def models_train_and_test_players(players_teams, features, target):
+    """
+        Trains and tests machine learning models on player-team data.
+
+        Parameters:
+        - players_teams (pd.DataFrame): DataFrame containing player-team data.
+        - features (list): List of feature columns used for training the models.
+        - target (str): Target column to be predicted.
+
+        Returns:
+        - trained_models (dict): Dictionary containing trained machine learning models.
+        """
     print("Models Running - Players")
     last_year_records, players_train_teams = find_and_move_max_year_records(players_teams)
 
@@ -229,6 +391,20 @@ def models_train_and_test_players(players_teams, features, target):
 
 
 def models_predict_future_players_dpr(players_teams, features, features_to_be_lagged, model, lag_years, predict_column):
+    """
+        Predicts Defense Score (DPR) for future years using a trained machine learning model.
+
+        Parameters:
+        - players_teams (pd.DataFrame): DataFrame containing player-team data.
+        - features (list): List of feature columns used for prediction.
+        - features_to_be_lagged (list): List of column names for which lagged features are to be created.
+        - model: Trained machine learning model.
+        - lag_years (int): Number of years to lag the features for prediction.
+        - predict_column (str): Column name to store the predicted values.
+
+        Returns:
+        - future_player_data (pd.DataFrame): DataFrame with predicted Defense Score for future years.
+        """
     print("Models Predicting - Players")
     # Creating dataframe with the next years predicted EFF for each player
 
@@ -249,6 +425,16 @@ def models_predict_future_players_dpr(players_teams, features, features_to_be_la
 
 
 def scale_data(scaler, x_train):
+    """
+        Scales the input data using the specified scaler.
+
+        Parameters:
+        - scaler: Scaler object for data scaling.
+        - x_train (pd.DataFrame): Input DataFrame to be scaled.
+
+        Returns:
+        - x_train_scaled (pd.DataFrame): Scaled DataFrame.
+        """
     columns = x_train.columns
     if scaler is not None:
         x_train = scaler.fit_transform(x_train)
@@ -257,6 +443,20 @@ def scale_data(scaler, x_train):
 
 
 def models_predict_future_players(players_teams, features, features_to_be_lagged, model, lag_years, predict_column):
+    """
+        Predicts future values for a specified column using a trained machine learning model.
+
+        Parameters:
+        - players_teams (pd.DataFrame): DataFrame containing player-team data.
+        - features (list): List of feature columns used for prediction.
+        - features_to_be_lagged (list): List of column names for which lagged features are to be created.
+        - model: Trained machine learning model.
+        - lag_years (int): Number of years to lag the features for prediction.
+        - predict_column (str): Column name to store the predicted values.
+
+        Returns:
+        - future_player_data (pd.DataFrame): DataFrame with predicted values for future years.
+        """
     print("Models Predicting - Players")
     # Creating dataframe with the next years predicted EFF for each player
 
@@ -292,7 +492,6 @@ def models_predict_future_players(players_teams, features, features_to_be_lagged
 
     future_player_data = create_lagged_features_players(future_player_data, features_to_be_lagged, lag_years)
 
-
     # Use the trained model to predict EFF for the next year
     future_predictions = model.predict(scale_data(RobustScaler(), future_player_data[features]))
 
@@ -302,6 +501,15 @@ def models_predict_future_players(players_teams, features, features_to_be_lagged
 
 
 def feature_creation_coaches(coaches):
+    """
+        Creates additional features for coach data, including Win-Loss Ratio (WLRatio) and Postseason Win-Loss Ratio (WLRatio_Post).
+
+        Parameters:
+        - coaches (pd.DataFrame): DataFrame containing coach data.
+
+        Returns:
+        - coaches (pd.DataFrame): DataFrame with added features.
+        """
     coaches['WLRatio'] = coaches['won'] / (coaches['won'] + coaches['lost'])
     coaches['WLRatio_Post'] = coaches['post_wins'] / (coaches['post_wins'] + coaches['post_losses'])
 
@@ -309,12 +517,32 @@ def feature_creation_coaches(coaches):
 
 
 def coaches_data_cleanup(coaches):
+    """
+        Cleans up coach data by sorting it based on 'stint' in descending order and keeping only the first entry for each year and team.
+
+        Parameters:
+        - coaches (pd.DataFrame): DataFrame containing coach data.
+
+        Returns:
+        - coaches (pd.DataFrame): Cleaned DataFrame with specified modifications.
+        """
     coaches = coaches.sort_values(by='stint', ascending=False)
     coaches = coaches.groupby(['year', 'tmID']).first().reset_index()
     return coaches
 
 
 def feature_creation_team_score(teams, players_teams, teams_map=None):
+    """
+        Creates Team Score features (Predicted and Real) and adds them to the 'teams' DataFrame.
+
+        Parameters:
+        - teams (pd.DataFrame): DataFrame containing team data.
+        - players_teams (pd.DataFrame): DataFrame containing player-team data with predicted and real Efficiency (EFF).
+        - teams_map (dict): Mapping dictionary for team names to numerical indices (default is None).
+
+        Returns:
+        - teams (pd.DataFrame): DataFrame with added Team Score features.
+        """
     # Creating Team Score (Predicted and Real)
 
     team_eff_stats = players_teams.groupby(['year', 'tmID'])['Predicted_EFF'].agg(['sum', 'count']).reset_index()
@@ -355,6 +583,16 @@ def feature_creation_team_score(teams, players_teams, teams_map=None):
 
 
 def feature_creation_teams(teams, players_teams):
+    """
+        Creates additional features for team data and adds them to the 'teams' DataFrame.
+
+        Parameters:
+        - teams (pd.DataFrame): DataFrame containing team data.
+        - players_teams (pd.DataFrame): DataFrame containing player-team data.
+
+        Returns:
+        - teams (pd.DataFrame): DataFrame with added features.
+        """
     print("Feature Creation - Teams")
     teams['progress'] = teams.apply(lambda row: progress(row), axis=1)
 
@@ -380,12 +618,32 @@ def feature_creation_teams(teams, players_teams):
 
 
 def merge_coaches(teams, coaches):
+    """
+        Merges coach data with team data based on the 'year' and 'tmID' columns.
+
+        Parameters:
+        - teams (pd.DataFrame): DataFrame containing team data.
+        - coaches (pd.DataFrame): DataFrame containing coach data.
+
+        Returns:
+        - teams (pd.DataFrame): Merged DataFrame with coach data.
+        """
     teams = pd.merge(teams, coaches[['year', 'tmID', 'WLRatio']], on=['year', 'tmID'], how='left')
 
     return teams
 
 
 def teams_data_cleanup(teams, team_map):
+    """
+        Cleans up team data by replacing team names with numerical indices and mapping playoff values to binary.
+
+        Parameters:
+        - teams (pd.DataFrame): DataFrame containing team data.
+        - team_map (dict): Mapping dictionary for team names to numerical indices.
+
+        Returns:
+        - teams (pd.DataFrame): Cleaned DataFrame with specified modifications.
+        """
     print("Teams Data Cleanup")
     teams['tmID'] = teams['tmID'].replace(team_map)
 
@@ -396,6 +654,17 @@ def teams_data_cleanup(teams, team_map):
 
 
 def create_lagged_features_teams(teams, features_to_be_lagged, lag_years):
+    """
+        Creates lagged features for specified columns in the 'teams' DataFrame.
+
+        Parameters:
+        - teams (pd.DataFrame): DataFrame containing team data.
+        - features_to_be_lagged (list): List of column names for which lagged features are to be created.
+        - lag_years (int): Number of years to lag the features.
+
+        Returns:
+        - teams (pd.DataFrame): DataFrame with added lagged features.
+        """
     print("Create Lagged Features Teams")
     # Create lagged features
     for feat in features_to_be_lagged:
@@ -406,8 +675,6 @@ def create_lagged_features_teams(teams, features_to_be_lagged, lag_years):
     lagged_features = [f'{feat}_Lag_{year}' for feat in features_to_be_lagged for year in
                        range(1, lag_years + 1)]
     teams[lagged_features] = teams[lagged_features].fillna(-1)
-
-    # ISTO ESTÁ UM BOCADO CHAPADO AQUI... TEM DE SE MUDAR (OU NAO)
     teams[[i for i in lagged_features if "playoff" in i]] = teams[
         [i for i in lagged_features if "playoff" in i]].replace(-1, 0.5)
 
@@ -415,6 +682,17 @@ def create_lagged_features_teams(teams, features_to_be_lagged, lag_years):
 
 
 def models_train_and_test_teams(teams, features, target):
+    """
+        Trains and tests machine learning models for team data.
+
+        Parameters:
+        - teams (pd.DataFrame): DataFrame containing team data.
+        - features (list): List of feature column names.
+        - target (str): Target column name.
+
+        Returns:
+        - trained_models: Result of running machine learning models.
+        """
     print("Models Running - Teams")
     this_year_records, train_teams = find_and_move_max_year_records(teams)
     x_train = train_teams[features]
@@ -429,6 +707,21 @@ def models_train_and_test_teams(teams, features, target):
 
 
 def models_predict_future_teams(teams, players_teams, teams_map, features, features_to_be_lagged, model, lag_years):
+    """
+       Predicts future team performance using machine learning models.
+
+       Parameters:
+       - teams (pd.DataFrame): DataFrame containing team data.
+       - players_teams (pd.DataFrame): DataFrame containing player-team data.
+       - teams_map (dict): Mapping dictionary for team names to numerical indices.
+       - features (list): List of feature column names.
+       - features_to_be_lagged (list): List of column names for which lagged features are to be created.
+       - model: Trained machine learning model.
+       - lag_years (int): Number of years to lag the features.
+
+       Returns:
+       - future_team_data (pd.DataFrame): DataFrame with predicted future team performance.
+       """
     print("Models Predicting - Teams")
     # Creating dataframe with the next years predicted EFF for each player
 
@@ -480,6 +773,15 @@ def models_predict_future_teams(teams, players_teams, teams_map, features, featu
 
 
 def turn_series_post_into_no_bias(series_post):
+    """
+        Converts the 'series_post' DataFrame into a format without bias, where team1 and team2 are randomly assigned.
+
+        Parameters:
+        - series_post (pd.DataFrame): DataFrame containing playoff series data.
+
+        Returns:
+        - series_post (pd.DataFrame): Transformed DataFrame with team1, team2, team1wins, and team2wins columns.
+        """
     # Create new columns for team1 and team2
     series_post['team1'] = np.where(np.random.rand(len(series_post)) < 0.5, series_post['tmIDWinner'],
                                     series_post['tmIDLoser'])
@@ -499,6 +801,16 @@ def turn_series_post_into_no_bias(series_post):
 
 
 def merge_teams(series_post, teams):
+    """
+        Merges the 'series_post' DataFrame with the 'teams' DataFrame for team1 and team2.
+
+        Parameters:
+        - series_post (pd.DataFrame): DataFrame containing playoff series data.
+        - teams (pd.DataFrame): DataFrame containing team data.
+
+        Returns:
+        - series_post (pd.DataFrame): Merged DataFrame with team1 and team2 data.
+        """
     # Merge for team1 using suffix '_team1'
     merged_team1 = pd.merge(series_post, teams, left_on=['year', 'team1'], right_on=['year', 'tmID'], how='inner')
 
@@ -512,6 +824,17 @@ def merge_teams(series_post, teams):
 
 
 def models_train_and_test_games(series_post, features, target):
+    """
+        Trains and tests machine learning models for simulating game outcomes.
+
+        Parameters:
+        - series_post (pd.DataFrame): DataFrame containing playoff series data.
+        - features (list): List of feature column names.
+        - target (str): Target column name.
+
+        Returns:
+        - trained_models: Trained machine learning models.
+        """
     print("Models Running - Games Simulation")
     this_year_records, train_teams = find_and_move_max_year_records(series_post)
     x_train = train_teams[features]
@@ -526,6 +849,18 @@ def models_train_and_test_games(series_post, features, target):
 
 
 def simulate_games(teams, model, features):
+    """
+        Trains and tests machine learning models for simulating game outcomes.
+        Alternative approach to predict the playoffs' qualification.
+
+        Parameters:
+        - series_post (pd.DataFrame): DataFrame containing playoff series data.
+        - features (list): List of feature column names.
+        - target (str): Target column name.
+
+        Returns:
+        - trained_models: Trained machine learning models.
+        """
     columns = features.copy()
     for feature in features:
         features[features.index(feature)] = feature[:-5] + 'x'
@@ -592,6 +927,11 @@ def simulate_games(teams, model, features):
 
 
 def data_profiling():
+    """
+        Generate data profiling reports for each DataFrame in the project.
+        Creates files with the performed analysis
+        Returns: None
+        """
     from ydata_profiling import ProfileReport
     import os
 
@@ -606,6 +946,12 @@ def data_profiling():
 
 
 def eleventh_year_data_load():
+    """
+        Load data for predicting the eleventh year.
+
+        Returns:
+        dict: A dictionary containing DataFrames for coaches, players_teams, and teams.
+        """
     print("Predict Data Load")
     players_teams = pd.read_csv('./Season 11/players_teams.csv')
     coaches = pd.read_csv('./Season 11/coaches.csv')
@@ -619,7 +965,18 @@ def eleventh_year_data_load():
 
     return dataframes_dict
 
+
 def merge_dataframes(df1, df2):
+    """
+        Merge two dictionaries of DataFrames.
+
+        Args:
+        df1 (dict): The first dictionary of DataFrames.
+        df2 (dict): The second dictionary of DataFrames.
+
+        Returns:
+        dict: Merged dictionary containing DataFrames from both input dictionaries.
+        """
     for k in df1.keys():
         if k in df2:
             df1[k] = pd.concat([df1[k], df2[k]])
@@ -630,7 +987,17 @@ def merge_dataframes(df1, df2):
 
     return df1
 
+
 def predict_11th_year():
+    """
+        Predict player and team performance for the 11th year of NBA data.
+
+        This function loads, processes, and predicts player and team metrics for the 11th year of NBA data.
+        It includes data loading, feature engineering, and using pre-trained machine learning models for predictions.
+
+        Returns:
+        None
+        """
     # Load data from CSVs
     dataframes_dict = initial_data_load()
     predict_year_dict = eleventh_year_data_load()
@@ -719,8 +1086,17 @@ def predict_11th_year():
     print(dataframes_dict['teams'][dataframes_dict['teams']['year'] == 11].head(len(team_map)))
 
 
-
 def main():
+    """
+        Main function for NBA playoff prediction.
+
+        This function orchestrates the entire workflow, including data loading, cleaning, feature engineering,
+        training and testing of machine learning models for player and team predictions, playoff predictions,
+        game simulation, and evaluation of the model's performance.
+
+        Returns:
+        None
+        """
     start = time.time()
     # Load data from CSVs
     dataframes_dict = initial_data_load()
