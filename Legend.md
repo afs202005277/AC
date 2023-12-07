@@ -1,0 +1,126 @@
+# Meaning of the different attributes provided, per table
+
+## Teams
+'year': The year in which the NBA season took place.
+'lgID': League ID, which identifies the specific basketball league or association (e.g., NBA).
+'tmID': Team ID, a unique identifier for each NBA team.
+'franchID': Franchise ID, a unique identifier for each NBA franchise, which may encompass multiple teams over time.
+'confID': Conference ID, indicating the conference (e.g., Eastern or Western) to which the team belongs.
+'rank': The team's regular-season ranking or position within its conference.
+'playoff': A binary indicator (e.g., 0 or 1) that signifies whether the team qualified for the playoffs (1 for yes, 0 for no).
+'seeded': Another binary indicator that may represent whether the team had a specific seed or ranking in the playoffs (1 for seeded, 0 for unseeded).
+'firstRound': A binary indicator that shows whether the team advanced to the first round of the playoffs.
+'semis': A binary indicator for whether the team reached the semifinals of the playoffs.
+'finals': A binary indicator for whether the team reached the finals of the playoffs.
+'name': The name of the NBA team.
+'o_fgm': Offensive field goals made by the team.
+'o_fga': Offensive field goals attempted by the team.
+'o_ftm': Offensive free throws made by the team.
+'o_fta': Offensive free throws attempted by the team.
+'o_3pm': Offensive three-pointers made by the team.
+'o_3pa': Offensive three-pointers attempted by the team.
+'o_oreb': Offensive rebounds by the team.
+'o_dreb': Defensive rebounds by the team.
+'o_reb': Total rebounds by the team.
+'o_asts': Assists made by the team.
+'o_pf': Personal fouls committed by the team.
+'o_stl': Offensive Steals (the number of times the team steals the ball from the opponent).
+'o_to': Offensive Turnovers (the number of times the team loses possession of the ball to the opponent).
+'o_blk': Offensive Blocks (the number of times the team blocks the opponent's shots).
+'o_pts': Offensive Points (the total number of points scored by the team on offense).
+'d_fgm': Defensive Field Goals Made (the number of field goals made by the opponent against the team's defense).
+'d_fga': Defensive Field Goals Attempted (the number of field goals attempted by the opponent against the team's defense).
+'d_ftm': Defensive Free Throws Made (the number of free throws made by the opponent against the team's defense).
+'d_fta': Defensive Free Throws Attempted (the number of free throws attempted by the opponent against the team's defense).
+'d_3pm': Defensive Three-Pointers Made (the number of three-pointers made by the opponent against the team's defense).
+'d_3pa': Defensive Three-Pointers Attempted (the number of three-pointers attempted by the opponent against the team's defense).
+'d_oreb': Defensive Offensive Rebounds (the number of offensive rebounds grabbed by the opponent against the team's defense).
+'d_dreb': Defensive Defensive Rebounds (the number of defensive rebounds grabbed by the opponent against the team's defense).
+'d_reb': Defensive Total Rebounds (the total number of rebounds grabbed by the opponent against the team's defense).
+'d_asts': Defensive Assists (the number of assists recorded by the opponent against the team's defense).
+'d_pf': Defensive Personal Fouls (the number of personal fouls committed by the opponent against the team's defense)
+'d_stl': Defensive Steals (the number of times the opponent steals the ball from the team).
+'d_to': Defensive Turnovers (the number of times the opponent forces the team into turnovers).
+'d_blk': Defensive Blocks (the number of times the opponent blocks the team's shots).
+'d_pts': Defensive Points (the total number of points scored by the opponent against the team's defense).
+'tmORB': Team Offensive Rebounds (the total number of offensive rebounds grabbed by the team).
+'tmDRB': Team Defensive Rebounds (the total number of defensive rebounds grabbed by the team).
+'tmTRB': Team Total Rebounds (the total number of rebounds grabbed by the team).
+'opptmORB': Opponent's Team Offensive Rebounds (the total number of offensive rebounds grabbed by the opponent's team).
+opptmDRB': Opponent's Team Defensive Rebounds (the total number of defensive rebounds grabbed by the opponent's team).
+'opptmTRB': Opponent's Team Total Rebounds (the total number of rebounds grabbed by the opponent's team).
+'won': Number of Games Won by the team.
+'lost': Number of Games Lost by the team.
+'GP': Total Games Played by the team.
+'homeW': Number of Home Games Won by the team.
+'homeL': Number of Home Games Lost by the team.
+'awayW': Number of Away Games Won by the team.
+'awayL': Number of Away Games Lost by the team.
+'confW': Number of Conference Games Won by the team.
+'confL': Number of Conference Games Lost by the team.
+'min': Total Minutes Played by the team.
+'attend': Attendance or the number of spectators in the arena for the team's games.
+'arena': The name of the arena where the team plays its home games.
+
+## Players_Teams
+'assists': Assists (the number of times a player assists in making a basket or scoring).
+'blocks': Blocks (the number of times a player blocks an opponent's shot attempt).
+'dq': Disqualifications (the number of times a player is disqualified from a game).
+'dRebounds': Defensive Rebounds (the number of defensive rebounds grabbed by a player).
+'fgAttempted': Field Goals Attempted (the number of field goals attempted by a player).
+'fgMade': Field Goals Made (the number of field goals successfully made by a player).
+'ftAttempted': Free Throws Attempted (the number of free throws attempted by a player).
+'ftMade': Free Throws Made (the number of free throws successfully made by a player).
+'GP': Games Played (the total number of games a player has participated in).
+'GS': Games Started (the total number of games a player has started in).
+'lgID': League ID (identifies the specific basketball league or association).
+'minutes': Minutes Played (the total number of minutes a player has been on the court).
+'oRebounds': Offensive Rebounds (the number of offensive rebounds grabbed by a player).
+'PF': Personal Fouls (the number of personal fouls committed by a player).
+'playerID': Player ID (a unique identifier for each NBA player).
+'points': Points Scored (the total number of points scored by a player).
+'PostAssists': Postseason Assists (the number of assists by a player in postseason games).
+'PostBlocks': Postseason Blocks (the number of blocks by a player in postseason games).
+'PostDQ': Postseason Disqualifications (the number of times a player was disqualified in postseason games).
+'PostdRebounds': Postseason Defensive Rebounds (the number of defensive rebounds by a player in postseason games).
+'PostfgAttempted': Postseason Field Goals Attempted (the number of field goals attempted by a player in postseason games).
+'PostfgMade': Postseason Field Goals Made (the number of field goals made by a player in postseason games)
+'PostftAttempted': Postseason Free Throws Attempted (the number of free throws attempted by a player in postseason games).
+'PostftMade': Postseason Free Throws Made (the number of free throws made by a player in postseason games).
+'PostGP': Postseason Games Played (the total number of postseason games a player has participated in).
+'PostGS': Postseason Games Started (the total number of postseason games a player has started in).
+'PostMinutes': Postseason Minutes Played (the total number of minutes a player has played in postseason games).
+'PostoRebounds': Postseason Offensive Rebounds (the number of offensive rebounds by a player in postseason games)
+'PostPF': Postseason Personal Fouls (the number of personal fouls committed by a player in postseason games).
+'PostPoints': Postseason Points Scored (the total number of points scored by a player in postseason games).
+'PostRebounds': Postseason Total Rebounds (the total number of rebounds by a player in postseason games).
+'PostSteals': Postseason Steals (the number of steals by a player in postseason games).
+'PostthreeAttempted': Postseason Three-Pointers Attempted (the number of three-pointers attempted by a player in postseason games).
+'PostthreeMade': Postseason Three-Pointers Made (the number of three-pointers made by a player in postseason games).
+'PostTurnovers': Postseason Turnovers (the number of turnovers committed by a player in postseason games).
+'rebounds': Total Rebounds (the total number of rebounds grabbed by a player).
+'steals': Steals (the number of steals by a player).
+'stint': Stint (a term used to describe a player's tenure or period of playing for a specific team).
+'threeAttempted': Three-Pointers Attempted (the number of three-pointers attempted by a player).
+'threeMade': Three-Pointers Made (the number of three-pointers made by a player).
+'tmID': Team ID (a unique identifier for each NBA team).
+'turnovers': Turnovers (the number of times a player loses possession of the ball to the opponent).
+'year': The year in which the NBA season took place.
+
+
+## Series_Post
+'L': Losses (the number of games lost).
+'lgIDLoser': League ID of the Losing Team (identifies the specific basketball league or association for the losing team).
+'lgIDWinner': League ID of the Winning Team (identifies the specific basketball league or association for the winning team).
+'round': Playoff Round (the round or stage of the playoffs).
+'series': Series (the series number or identifier for the playoff matchup).
+'tmIDLoser': Team ID of the Losing Team (a unique identifier for the losing team).
+'tmIDWinner': Team ID of the Winning Team (a unique identifier for the winning team).
+'W': Wins (the number of games won).
+'year': The year in which the NBA season or playoffs took place.
+
+
+meaning of the 'round' attribute:
+'FR': First Round - This is the initial round of the NBA playoffs, where multiple teams from each conference compete against each other. The winners of the First Round move on to the subsequent rounds, such as the Conference Semifinals and Conference Finals, on their way to the NBA Finals.
+'CF': Conference Finals - This indicates the round in which the two top teams from each conference (Eastern and Western) compete against each other to determine the conference champions. The winners of the Eastern and Western Conference Finals then advance to the NBA Finals.
+'F': NBA Finals - This indicates the championship round of the NBA playoffs. It's the final stage where the champions of the Eastern and Western Conferences face off to compete for the NBA championship.
