@@ -245,6 +245,7 @@ def run_all(x_train_original, y_train_original, x_test_original, y_test_original
                 params = model_info['params']
                 model_name = model_info['name']
 
+                y_train = y_train.astype(str)
                 y_train[y_train == 1] = 'Y'
                 y_train[y_train == 0] = 'N'
 
