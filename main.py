@@ -6,14 +6,6 @@ import numpy as np
 from sklearn.preprocessing import LabelEncoder, RobustScaler
 import models
 
-FAST = True
-"""
-Flag indicating whether to run the program in fast mode.
-If True, the script will test a smaller number of machine learning models.
-Also, for performance improvement, the program persists trained models in local file system ("models" folder).
-
-"""
-
 MODEL_PLAYERS_EFF = "Random Forest Regressor_RobustScaler"
 """
 Model name for predicting player Efficiency (EFF).
@@ -357,7 +349,7 @@ def models_train_and_test_players_dpr(players_teams, features, target):
     y_train = players_train_teams[target]
     x_test = last_year_records[features]
     y_test = last_year_records[target]
-    trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target, "Players", FAST)
+    trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target, "Players")
 
     features.remove('year')
 
@@ -383,7 +375,7 @@ def models_train_and_test_players(players_teams, features, target):
     y_train = players_train_teams[target]
     x_test = last_year_records[features]
     y_test = last_year_records[target]
-    trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target, "Players", FAST)
+    trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target, "Players")
 
     features.remove('year')
 
@@ -699,7 +691,7 @@ def models_train_and_test_teams(teams, features, target):
     y_train = train_teams[target]
     x_test = this_year_records[features]
     y_test = this_year_records[target]
-    trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target, "Teams", FAST)
+    trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target, "Teams")
 
     features.remove('year')
 
@@ -841,7 +833,7 @@ def models_train_and_test_games(series_post, features, target):
     y_train = train_teams[target]
     x_test = this_year_records[features]
     y_test = this_year_records[target]
-    trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target, "GamesSimulator", False)
+    trained_models = models.run_all(x_train, y_train, x_test, y_test, 3, 7, target, "GamesSimulator")
 
     features.remove('year')
 
@@ -1243,4 +1235,4 @@ def main():
     print("Elapsed time: " + str(end - start))
 
 
-predict_11th_year()
+main()

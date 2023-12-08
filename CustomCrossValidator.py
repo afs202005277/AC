@@ -50,8 +50,8 @@ class CustomCrossValidator(BaseCrossValidator):
 
         # Iterate through the dataset using a sliding window of years
         for window_size in range(self.min_years, self.max_years + 1):
-            for i in range(
-                    max(years) - window_size + 1):
+            for i in range(int(
+                    max(years) - window_size + 1)):
                 # Define the start and end years for the window
                 start_year = i
                 end_year = start_year + window_size

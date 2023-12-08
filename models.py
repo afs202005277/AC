@@ -80,7 +80,7 @@ slow_regression_models = [
     }
 ]
 """
-A list of slow regression models along with their associated hyperparameter search spaces.
+A list of regression models along with their associated hyperparameter search spaces.
 Each model is represented as a dictionary containing the model's name, the model instance, and a dictionary of hyperparameter values to be explored.
 """
 
@@ -136,39 +136,7 @@ slow_classifier_models = [
     }
 ]
 """
-A list of slow classifier models along with their associated hyperparameter search spaces.
-Each model is represented as a dictionary containing the model's name, the model instance, and a dictionary of hyperparameter values to be explored.
-"""
-
-fast_regression_models = [
-    {
-        'name': 'Support Vector Regressor',
-        'model': SVR(),
-        'params': {'C': [0.1, 1, 10, 100, 1000],
-                   'kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
-                   'degree': [2, 3, 4, 5],
-                   'gamma': ['scale', 'auto'],
-                   'coef0': [0, 1, 2, 3],
-                   'shrinking': [True, False],
-                   'tol': [1e-3, 1e-4, 1e-5],
-                   'max_iter': [1000, 2000, 25000]}
-    }
-]
-"""
-A list of fast regression models along with their associated hyperparameter search spaces.
-Each model is represented as a dictionary containing the model's name, the model instance, and a dictionary of hyperparameter values to be explored.
-"""
-
-fast_classifier_models = [
-    {
-        'name': 'Linear SVC',
-        'model': LinearSVC(),
-        'params': {'C': [0.1, 1, 10],
-                   'penalty': ['l1', 'l2']}
-    }
-]
-"""
-A list of fast classifier models along with their associated hyperparameter search spaces.
+A list of classifier models along with their associated hyperparameter search spaces.
 Each model is represented as a dictionary containing the model's name, the model instance, and a dictionary of hyperparameter values to be explored.
 """
 
@@ -240,7 +208,7 @@ def scale_dataframe(scaler, x_train, x_test):
 
 
 def run_all(x_train_original, y_train_original, x_test_original, y_test_original, min_years, max_years, target_column,
-            name, fast):
+            name):
     """
        Run a comprehensive machine learning analysis including training, testing, and evaluation of models.
 
@@ -253,7 +221,6 @@ def run_all(x_train_original, y_train_original, x_test_original, y_test_original
        max_years (int): The maximum year for cross-validation.
        target_column (str): The target column or variable that the models predict.
        name (str): The identifier for the specific use or purpose of the models.
-       fast (bool): Flag indicating whether to use fast or slow models.
 
        Returns:
        dict: A dictionary containing trained machine learning models.
@@ -263,13 +230,8 @@ def run_all(x_train_original, y_train_original, x_test_original, y_test_original
     trained_models = {}
 
     store = False
-    if fast:
-        regression_models = fast_regression_models
-        classifier_models = fast_classifier_models
-        scalers = {'None': scalers['None']}
-    else:
-        regression_models = slow_regression_models
-        classifier_models = slow_classifier_models
+    regression_models = slow_regression_models
+    classifier_models = slow_classifier_models
 
     if target_column == 'playoff':
         # Using Classifier Models on playoff
@@ -389,8 +351,6 @@ def run_all(x_train_original, y_train_original, x_test_original, y_test_original
 
                     y_test = data['y_test']
                     y_pred = data['y_pred']
-
-                    print(str(data))
 
                     accuracy = accuracy_score(y_test, y_pred)
                     precision = precision_score(y_test, y_pred, pos_label='Y')

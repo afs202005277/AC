@@ -218,14 +218,14 @@ def draw_plots_model_scaler():
 
 def main():
     draw_plots_model_scaler()
-    """dataframes_dict = load_data()
+    dataframes_dict = load_data()
     coaches_analysis(dataframes_dict)
     awards_analysis(dataframes_dict)
     players_teams_analysis(dataframes_dict)
     players_analysis(dataframes_dict)
     teams_analysis(dataframes_dict)
     teams_post_analysis(dataframes_dict)
-    series_post_analysis(dataframes_dict)"""
+    series_post_analysis(dataframes_dict)
 
 
 main()
