@@ -270,7 +270,7 @@ def merge_players_teams(players_teams, players):
         """
     print("Merge Player Teams")
     players_teams = pd.merge(players_teams, players, left_on='playerID', right_on='bioID',
-                             how='outer').drop_duplicates()
+                             how='inner').drop_duplicates()
 
     return players_teams
 
@@ -1089,6 +1089,7 @@ def main():
         Returns:
         None
         """
+    global MODEL_PLAYERS_EFF, MODEL_PLAYERS_DPR, MODEL_TEAMS, MODEL_GAMES_SIM
     start = time.time()
     # Load data from CSVs
     dataframes_dict = initial_data_load()
@@ -1120,6 +1121,9 @@ def main():
                 range(1, lag_years_players + 1)] + ['year']
     target = 'EFF'
     trained_models_players = models_train_and_test_players(dataframes_dict['players_teams'], features, target)
+    if MODEL_PLAYERS_EFF not in trained_models_players.keys():
+        print("Main model not found, choosing another option")
+        MODEL_PLAYERS_EFF = list(trained_models_players.keys())[0]
     eff_model = trained_models_players[MODEL_PLAYERS_EFF]
     dataframes_dict['players_teams'] = models_predict_future_players(dataframes_dict['players_teams'], features,
                                                                      features_to_be_lagged,
@@ -1130,6 +1134,9 @@ def main():
     target = 'DPR'
 
     trained_models_players = models_train_and_test_players_dpr(dataframes_dict['players_teams'], features, target)
+    if MODEL_PLAYERS_DPR not in trained_models_players.keys():
+        print("Main model not found, choosing another option")
+        MODEL_PLAYERS_DPR = list(trained_models_players.keys())[0]
     dpr_model = trained_models_players[MODEL_PLAYERS_DPR]
 
     dataframes_dict['players_teams'] = models_predict_future_players_dpr(dataframes_dict['players_teams'], features,
@@ -1165,7 +1172,9 @@ def main():
                          'PredictedTeamScore' + team for team in ['_team1', '_team2']]
     target = 'team1wins_team1'
     trained_models_for_games = models_train_and_test_games(dataframes_dict['series_post'], features_games, target)
-
+    if MODEL_GAMES_SIM not in trained_models_for_games.keys():
+        print("Main model not found, choosing another option")
+        MODEL_GAMES_SIM = list(trained_models_for_games.keys())[0]
     print("TEAMS PLAYOFF PREDICT")
 
     # Select relevant features including lagged features
@@ -1174,6 +1183,9 @@ def main():
     target = 'playoff'
     trained_models_teams = models_train_and_test_teams(dataframes_dict['teams'], features, target)
 
+    if MODEL_TEAMS not in trained_models_teams.keys():
+        print("Main model not found, choosing another option")
+        MODEL_TEAMS = list(trained_models_teams.keys())[0]
     dataframes_dict['teams'] = models_predict_future_teams(dataframes_dict['teams'], dataframes_dict['players_teams'],
                                                            team_map, features, features_to_be_lagged,
                                                            trained_models_teams[MODEL_TEAMS],
@@ -1235,4 +1247,4 @@ def main():
     print("Elapsed time: " + str(end - start))
 
 
-main()
+predict_11th_year()
